@@ -1,60 +1,39 @@
-# =====================================================
-# Build / Maven
-# =====================================================
 target/
-build/
-out/
-*.class
-*.jar
-*.war
-*.ear
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+.kotlin
 
-# =====================================================
-# IDE - IntelliJ IDEA
-# =====================================================
-.idea/
-*.iml
+### IntelliJ IDEA ###
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
 *.iws
+*.iml
 *.ipr
 
-# =====================================================
-# IDE - Eclipse
-# =====================================================
+### Eclipse ###
+.apt_generated
 .classpath
-.project
-.settings/
 .factorypath
-.apt_generated/
+.project
+.settings
 .springBeans
 .sts4-cache
 
-# =====================================================
-# IDE - VS Code
-# =====================================================
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
 .vscode/
 
-# =====================================================
-# IDE - NetBeans
-# =====================================================
-nbproject/private/
-nbbuild/
-nbdist/
-.nb-gradle/
-
-# =====================================================
-# OS
-# =====================================================
+### Mac OS ###
 .DS_Store
-Thumbs.db
-desktop.ini
-
-# =====================================================
-# Logs et fichiers temporaires
-# =====================================================
-*.log
-*.tmp
-
-# =====================================================
-# Maven wrapper (a garder si present)
-# =====================================================
-!.mvn/wrapper/maven-wrapper.jar
