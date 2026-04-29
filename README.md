@@ -18,16 +18,19 @@ Application e-commerce Jakarta EE developpee dans le cadre du cours
 
 Avant de commencer, installer :
 
-1. **JDK 17** : https://adoptium.net/
+1. **JDK 17** : https://adoptium.net/temurin/releases/?version=17
+   - **Obligatoire pour WildFly** (Java 24+ ne fonctionne pas, le SecurityManager a ete supprime)
+   - Tu peux avoir une autre JDK (21, 25...) installee en parallele pour ton IDE
 2. **Maven 3.9+** : https://maven.apache.org/download.cgi
 3. **MySQL 8** : https://dev.mysql.com/downloads/installer/ (ou XAMPP)
-4. **WildFly 30+** : https://www.wildfly.org/downloads/
-5. **Git**
+4. **Git**
+
+WildFly est telecharge automatiquement par le plugin Maven, pas besoin de l'installer manuellement.
 
 Verifier les installations :
 
 ```bash
-java -version       # doit afficher 17
+java -version       # 17 minimum (compilation), 17 max (pour WildFly)
 mvn -version
 mysql --version
 ```
@@ -68,28 +71,36 @@ Editer `src/main/resources/META-INF/persistence.xml` :
 <property name="jakarta.persistence.jdbc.password" value="root"/>
 ```
 
-### 4. Compiler et packager
+### 4. Compiler
 
 ```bash
-mvn clean package
+mvn clean compile
 ```
 
-Le fichier WAR est genere dans `target/eboutique.war`.
+### 5. Lancer WildFly (avec JDK 17)
 
-### 5. Deployer sur WildFly
+Le plugin Maven telecharge WildFly automatiquement (premier run = ~250 MB,
+ensuite c'est cache).
 
-Demarrer WildFly :
+**Sur Windows (Git Bash)** :
 
 ```bash
-cd WILDFLY_HOME/bin
-./standalone.sh         # Linux/Mac
-standalone.bat          # Windows
+JAVA_HOME='/c/Program Files/Eclipse Adoptium/jdk-17.0.17.10-hotspot' mvn wildfly:run
 ```
 
-Copier le WAR dans le dossier de deploiement :
+Adapte le chemin a ton installation JDK 17 (verifie avec `ls "/c/Program Files/Eclipse Adoptium"`).
+
+**Sur Windows (PowerShell)** :
+
+```powershell
+$env:JAVA_HOME='C:\Program Files\Eclipse Adoptium\jdk-17.0.17.10-hotspot'
+mvn wildfly:run
+```
+
+**Sur Linux/Mac** :
 
 ```bash
-cp target/eboutique.war WILDFLY_HOME/standalone/deployments/
+JAVA_HOME=/path/to/jdk-17 mvn wildfly:run
 ```
 
 ### 6. Verifier
@@ -97,6 +108,14 @@ cp target/eboutique.war WILDFLY_HOME/standalone/deployments/
 Ouvrir http://localhost:8080/eboutique/
 
 Si tout marche, tu vois la page d'accueil avec les 3 modules.
+
+Pour arreter WildFly : Ctrl+C dans le terminal Maven.
+
+### Pourquoi JDK 17 et pas plus recent ?
+
+WildFly 39 utilise par defaut `-Djava.security.manager=allow`, qui n'est plus
+supporte sur Java 24+ (le SecurityManager a ete supprime via JEP 486).
+Le serveur ne demarre pas. JDK 17 ou 21 fonctionnent.
 
 ## Workflow Git
 

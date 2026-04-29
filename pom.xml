@@ -104,6 +104,37 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.4.0</version>
             </plugin>
+            <!--
+                WildFly Maven Plugin :
+                - mvn wildfly:dev    : telecharge WildFly, deploie le WAR, demarre en mode dev
+                - mvn wildfly:run    : deploie + demarre (sans hot reload)
+                - mvn wildfly:start  : demarre seulement
+                - mvn wildfly:shutdown : arrete le serveur
+            -->
+            <plugin>
+                <groupId>org.wildfly.plugins</groupId>
+                <artifactId>wildfly-maven-plugin</artifactId>
+                <version>5.0.0.Final</version>
+                <configuration>
+                    <feature-packs>
+                        <feature-pack>
+                            <location>org.wildfly:wildfly-galleon-pack:30.0.1.Final</location>
+                        </feature-pack>
+                    </feature-packs>
+                    <provisioning-dir>${project.build.directory}/server</provisioning-dir>
+                    <!--
+                        javaOpts override : retire -Djava.security.manager=allow par defaut
+                        car le SecurityManager est supprime sur Java 24+ (Emile est sur Java 25).
+                    -->
+                    <javaOpts>
+                        <javaOpt>-Xms64m</javaOpt>
+                        <javaOpt>-Xmx512m</javaOpt>
+                        <javaOpt>-Djava.net.preferIPv4Stack=true</javaOpt>
+                        <javaOpt>-Djava.awt.headless=true</javaOpt>
+                        <javaOpt>-Djboss.modules.system.pkgs=org.jboss.byteman</javaOpt>
+                    </javaOpts>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

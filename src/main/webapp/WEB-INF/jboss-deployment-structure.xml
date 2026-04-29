@@ -11,8 +11,9 @@
             <module name="org.hibernate"/>
             <module name="org.hibernate.envers"/>
         </exclusions>
-        <dependencies>
-            <module name="com.mysql"/>
-        </dependencies>
+        <!--
+            Pas de dependance vers com.mysql : le driver JDBC MySQL est bundle
+            dans WEB-INF/lib via la dependance Maven mysql-connector-j.
+        -->
     </deployment>
 </jboss-deployment-structure>
