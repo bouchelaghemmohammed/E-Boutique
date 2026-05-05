@@ -37,14 +37,14 @@ public class MailService {
 
     public void envoyerConfirmationCommande(Commande commande) throws MessagingException {
         Utilisateur client = commande.getUtilisateur();
-        if (client == null || client.getCourriel() == null) {
+        if (client == null || client.getEmail() == null) {
             throw new MessagingException("Destinataire manquant");
         }
 
         Session session = creerSession();
         MimeMessage message = new MimeMessage(session);
         message.setFrom(new InternetAddress(MAIL_FROM));
-        message.setRecipients(Message.RecipientType.TO, client.getCourriel());
+        message.setRecipients(Message.RecipientType.TO, client.getEmail());
         message.setSubject("Confirmation de votre commande #" + commande.getId(), "UTF-8");
         message.setContent(construireCorps(commande), "text/html; charset=UTF-8");
 

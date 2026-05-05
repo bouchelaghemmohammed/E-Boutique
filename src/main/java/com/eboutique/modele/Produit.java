@@ -1,20 +1,19 @@
 package com.eboutique.modele;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-// STUB temporaire pour permettre a LigneCommande et Panier de compiler.
-// Sera remplace par la version complete de Dev B lors du merge.
+/**
+ * Entité JPA représentant un produit du catalogue E-Boutique.
+ * Stockée dans la table `produits`.
+ */
 @Entity
 @Table(name = "produits")
 public class Produit implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,10 +31,16 @@ public class Produit implements Serializable {
     @Column(nullable = false)
     private int stock;
 
+    /** Catégorie du produit (ex : Informatique, Audio, Téléphonie…) */
+    @Column(length = 80)
+    private String categorie;
+
     @Column(name = "chemin_image")
     private String cheminImage;
 
     public Produit() {}
+
+    // ---- Getters / Setters ----
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -51,6 +56,9 @@ public class Produit implements Serializable {
 
     public int getStock() { return stock; }
     public void setStock(int stock) { this.stock = stock; }
+
+    public String getCategorie() { return categorie; }
+    public void setCategorie(String categorie) { this.categorie = categorie; }
 
     public String getCheminImage() { return cheminImage; }
     public void setCheminImage(String cheminImage) { this.cheminImage = cheminImage; }
