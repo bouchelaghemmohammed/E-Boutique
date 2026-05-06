@@ -1,6 +1,6 @@
 package com.eboutique.filter;
 
-import com.eboutique.modele.Utilisateur;
+import com.eboutique.modele.User;
 
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
@@ -36,9 +36,9 @@ public class LogFilter implements Filter {
         String utilisateur = "anonyme";
         HttpSession session = req.getSession(false);
         if (session != null) {
-            Utilisateur u = (Utilisateur) session.getAttribute("utilisateurConnecte");
+            User u = (User) session.getAttribute("utilisateurConnecte");
             if (u != null) {
-                utilisateur = u.getEmail() + " [" + u.getRole() + "]";
+                utilisateur = u.getEmail() + " [" + u.getRole().getName() + "]";
             }
         }
 

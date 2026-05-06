@@ -1,7 +1,7 @@
 package com.eboutique.servlet;
 
-import com.eboutique.modele.Utilisateur;
-import com.eboutique.service.UtilisateurService;
+import com.eboutique.modele.User;
+import com.eboutique.service.UserService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,13 +14,11 @@ import java.io.IOException;
 
 /**
  * Servlet du profil utilisateur (GET + POST /profil).
- * GET  : affiche les informations du profil.
- * POST : met à jour les infos personnelles et/ou le mot de passe.
  */
 @WebServlet(name = "ProfilServlet", urlPatterns = {"/profil"})
 public class ProfilServlet extends HttpServlet {
 
-    private final UtilisateurService utilisateurService = new UtilisateurService();
+    private final UserService userService = new UserService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -35,17 +33,14 @@ public class ProfilServlet extends HttpServlet {
         req.setCharacterEncoding("UTF-8");
 
         HttpSession session = req.getSession(false);
-        Utilisateur connecte = (Utilisateur) session.getAttribute("utilisateurConnecte");
+        User connecte = (User) session.getAttribute("utilisateurConnecte");
 
-        String action    = req.getParameter("action");
-        String prenom    = req.getParameter("prenom");
-        String nom       = req.getParameter("nom");
-        String telephone = req.getParameter("telephone");
-        String adresse   = req.getParameter("adresse");
+        String action = req.getParameter("action");
+        String firstName = req.getParameter("prenom");
+        String lastName = req.getParameter("nom");
 
         try {
             if ("changerMotDePasse".equals(action)) {
-                // --- Changement de mot de passe ---
                 String ancienMdp  = req.getParameter("ancienMotDePasse");
                 String nouveauMdp = req.getParameter("nouveauMotDePasse");
                 String confMdp    = req.getParameter("confirmerMotDePasse");
@@ -55,19 +50,15 @@ public class ProfilServlet extends HttpServlet {
                     req.getRequestDispatcher("/WEB-INF/views/profil.jsp").forward(req, resp);
                     return;
                 }
-                utilisateurService.changerMotDePasse(connecte.getId(), ancienMdp, nouveauMdp);
+                userService.changerMotDePasse(connecte.getId(), ancienMdp, nouveauMdp);
                 req.setAttribute("succesMdp", "Mot de passe modifié avec succès !");
 
             } else {
-                // --- Mise à jour du profil ---
-                Utilisateur mis = utilisateurService.mettreAJourProfil(
-                        connecte.getId(), prenom, nom, telephone, adresse);
-
-                // Mettre à jour l'objet en session
+                User mis = userService.mettreAJourProfil(connecte.getId(), firstName, lastName);
                 session.setAttribute("utilisateurConnecte", mis);
                 req.setAttribute("succesInfos", "Profil mis à jour avec succès !");
             }
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             if ("changerMotDePasse".equals(action)) {
                 req.setAttribute("erreurMdp", e.getMessage());
             } else {

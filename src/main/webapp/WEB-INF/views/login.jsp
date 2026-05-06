@@ -15,6 +15,11 @@
 <div class="auth-page">
     <div class="auth-card animate-slide">
 
+        <%-- Back to home --%>
+        <a href="${pageContext.request.contextPath}/accueil" class="auth-back">
+            ← Retour à l'accueil
+        </a>
+
         <%-- Logo --%>
         <div class="auth-logo">
             <h1>🛒 E-<span>Boutique</span></h1>
@@ -36,7 +41,7 @@
         </c:if>
 
         <%-- Formulaire de connexion --%>
-        <form method="post" action="${pageContext.request.contextPath}/connexion" id="form-connexion">
+        <form method="post" action="${pageContext.request.contextPath}/connexion" id="form-connexion" >
             <%-- Paramètre de redirection --%>
             <c:if test="${not empty param.redirect}">
                 <input type="hidden" name="redirect" value="${param.redirect}"/>
@@ -86,13 +91,6 @@
             </a>
         </div>
 
-        <%-- Compte démo pour faciliter les tests --%>
-        <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(16,185,129,0.05);
-                    border: 1px dashed rgba(16,185,129,0.2); border-radius: 8px; font-size: 0.8rem;
-                    color: var(--text-secondary); text-align: center;">
-            <strong style="color: var(--green-400);">Compte administrateur de démo</strong><br/>
-            admin@gmail.com / admin123
-        </div>
     </div>
 </div>
 

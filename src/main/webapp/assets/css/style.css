@@ -54,6 +54,7 @@
     --text-secondary: #94a3b8;
     --nav-bg:       rgba(2, 6, 23, 0.85);
     --accent:       var(--green-500);
+    --hero-gradient: linear-gradient(135deg, #064e3b 0%, #020617 100%);
 }
 
 /* ----------------------------------------------------------------
@@ -427,7 +428,7 @@ footer a { color: var(--green-400); }
     transition: border-color var(--transition), box-shadow var(--transition);
     outline: none;
 }
-.form-control::placeholder { color: var(--slate-600); }
+.form-control::placeholder { color: var(--text-secondary); opacity: 0.6; }
 .form-control:focus {
     border-color: var(--green-500);
     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
@@ -616,6 +617,19 @@ tbody td {
 }
 
 .auth-card--wide { max-width: 600px; }
+
+.auth-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    transition: color var(--transition);
+}
+.auth-back:hover { color: var(--green-500); }
 
 .auth-logo {
     text-align: center;
@@ -814,8 +828,210 @@ tbody td {
 .animate-slide { animation: slideUp 0.4s ease; }
 
 /* ----------------------------------------------------------------
-   18. Responsive
+   18. Hero Section
    ---------------------------------------------------------------- */
+.hero {
+    position: relative;
+    padding: 6rem 0;
+    background: radial-gradient(circle at top right, #064e3b, #020617);
+    color: white;
+    text-align: center;
+    overflow: hidden;
+    margin-top: -2.5rem;
+}
+
+
+.hero__content {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero__title {
+    font-size: 2.8rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    letter-spacing: -0.03em;
+}
+
+.hero__title span {
+    color: var(--green-400);
+    display: block;
+}
+
+.hero__subtitle {
+    font-size: 1.1rem;
+    color: var(--slate-300);
+    margin-bottom: 2.5rem;
+    max-width: 550px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero__actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+/* ----------------------------------------------------------------
+   19. Product Grid (Catalogue)
+   ---------------------------------------------------------------- */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    margin: 3rem 0;
+}
+
+.product-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all var(--transition);
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2), var(--shadow-glow);
+}
+
+.product-card__image {
+    position: relative;
+    aspect-ratio: 1;
+    background: var(--slate-900);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.product-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-card__image img {
+    transform: scale(1.1);
+}
+
+.product-card__content {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card__category {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--green-400);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+.product-card__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+}
+
+.product-card__price {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--green-400);
+    margin-top: auto;
+    margin-bottom: 1.25rem;
+}
+
+/* ----------------------------------------------------------------
+   20. Features Section
+   ---------------------------------------------------------------- */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: -3rem;
+    position: relative;
+    z-index: 10;
+}
+
+.feature-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: transform var(--transition);
+}
+
+.feature-item:hover {
+    transform: translateY(-5px);
+}
+
+.feature-item__icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.feature-item__title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* ----------------------------------------------------------------
+   21. Footer Simplified
+   ---------------------------------------------------------------- */
+.footer-simple {
+    padding: 3rem 0;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    background: var(--bg-primary);
+}
+
+.footer-simple__links {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.footer-simple__links a {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.footer-simple__links a:hover {
+    color: var(--green-400);
+}
+
+.footer-simple__copy {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* ----------------------------------------------------------------
+   21. Responsive
+   ---------------------------------------------------------------- */
+@media (max-width: 992px) {
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+
 @media (max-width: 768px) {
     .form-row { grid-template-columns: 1fr; }
     .profil-grid { grid-template-columns: 1fr; }
@@ -823,6 +1039,12 @@ tbody td {
     .navbar__links { display: none; }
     .auth-card { padding: 1.75rem; }
     .dashboard-header h1 { font-size: 1.5rem; }
+}
+
+@media (max-width: 640px) {
+    .hero__title { font-size: 2.5rem; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .hero__actions { flex-direction: column; }
 }
 
 /* Theme Toggle Button */

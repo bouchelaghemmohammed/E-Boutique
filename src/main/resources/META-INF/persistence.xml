@@ -7,23 +7,30 @@
 
     <persistence-unit name="eboutiquePU" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <class>com.eboutique.modele.Utilisateur</class>
-        <class>com.eboutique.modele.Produit</class>
-        <class>com.eboutique.modele.Commande</class>
-        <class>com.eboutique.modele.LigneCommande</class>
+        <class>com.eboutique.modele.User</class>
+        <class>com.eboutique.modele.Product</class>
+        <class>com.eboutique.modele.Order</class>
+        <class>com.eboutique.modele.OrderItem</class>
+        <class>com.eboutique.modele.Role</class>
+        <class>com.eboutique.modele.Category</class>
         
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
 
         <properties>
+            <!-- Connexion MySQL -->
             <property name="jakarta.persistence.jdbc.driver"   value="com.mysql.cj.jdbc.Driver"/>
             <property name="jakarta.persistence.jdbc.url"      value="jdbc:mysql://localhost:3306/eboutique?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true"/>
             <property name="jakarta.persistence.jdbc.user"     value="root"/>
             <property name="jakarta.persistence.jdbc.password" value="root"/>
 
-            <property name="hibernate.dialect"      value="org.hibernate.dialect.MySQLDialect"/>
-            <property name="hibernate.show_sql"     value="true"/>
-            <property name="hibernate.format_sql"   value="true"/>
-            <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <!-- Configuration Hibernate -->
+            <property name="hibernate.dialect"                  value="org.hibernate.dialect.MySQLDialect"/>
+            <property name="hibernate.hbm2ddl.auto"             value="update"/>
+            <property name="hibernate.show_sql"                 value="true"/>
+            <property name="hibernate.format_sql"               value="true"/>
+
+            <!-- Empêcher WildFly de basculer sur la base H2 par défaut -->
+            <property name="wildfly.jpa.twophase" value="false" />
         </properties>
     </persistence-unit>
 

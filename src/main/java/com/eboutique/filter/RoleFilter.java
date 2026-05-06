@@ -1,8 +1,6 @@
 package com.eboutique.filter;
 
-import com.eboutique.modele.Role;
-import com.eboutique.modele.Utilisateur;
-
+import com.eboutique.modele.User;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +12,6 @@ import java.io.IOException;
 /**
  * Filtre de contrôle des rôles.
  * Protège les URLs /admin/* contre les accès par des utilisateurs non-ADMIN.
- * Suppose que AuthFilter a déjà vérifié que l'utilisateur est connecté.
  */
 @WebFilter(filterName = "RoleFilter", urlPatterns = {"/admin/*"})
 public class RoleFilter implements Filter {
@@ -33,9 +30,9 @@ public class RoleFilter implements Filter {
             return;
         }
 
-        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateurConnecte");
+        User user = (User) session.getAttribute("utilisateurConnecte");
 
-        if (!Role.ADMIN.equals(utilisateur.getRole())) {
+        if (!user.isAdmin()) {
             resp.sendRedirect(req.getContextPath() + "/dashboard?erreur=acces_refuse");
             return;
         }
