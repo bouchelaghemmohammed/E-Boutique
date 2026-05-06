@@ -15,7 +15,7 @@
      ========================================================= --%>
 <div class="dashboard-header animate-fade">
     <h1>
-        Bonjour, <span><c:out value="${utilisateurConnecte.prenom}"/></span> 👋
+        Bonjour, <span><c:out value="${utilisateurConnecte.firstName}"/></span> 👋
     </h1>
     <p class="text-muted">
         <c:choose>
@@ -162,24 +162,24 @@
                     <c:forEach var="cmd" items="${toutesCommandes}" begin="0" end="4">
                         <tr>
                             <td><strong class="text-green">#${cmd.id}</strong></td>
-                            <td><c:out value="${cmd.utilisateur.nomComplet}"/></td>
+                            <td><c:out value="${cmd.user.fullName}"/></td>
                             <td>
-                                <fmt:formatDate value="${cmd.dateCommande}" pattern="dd/MM/yyyy HH:mm"
+                                <fmt:formatDate value="${cmd.orderDate}" pattern="dd/MM/yyyy HH:mm"
                                     type="both"/>
                             </td>
                             <td><fmt:formatNumber value="${cmd.total}" type="currency" currencySymbol="$"/></td>
                             <td>
                                 <c:choose>
-                                    <c:when test="${cmd.statut == 'EN_ATTENTE'}">
+                                    <c:when test="${cmd.status == 'PENDING'}">
                                         <span class="badge badge-yellow">En attente</span>
                                     </c:when>
-                                    <c:when test="${cmd.statut == 'CONFIRMEE'}">
+                                    <c:when test="${cmd.status == 'CONFIRMED'}">
                                         <span class="badge badge-green">Confirmée</span>
                                     </c:when>
-                                    <c:when test="${cmd.statut == 'EXPEDIEE'}">
+                                    <c:when test="${cmd.status == 'SHIPPED'}">
                                         <span class="badge badge-blue">Expédiée</span>
                                     </c:when>
-                                    <c:when test="${cmd.statut == 'LIVREE'}">
+                                    <c:when test="${cmd.status == 'DELIVERED'}">
                                         <span class="badge badge-green">Livrée</span>
                                     </c:when>
                                     <c:otherwise>
@@ -210,20 +210,20 @@
                         <tr>
                             <td><strong class="text-green">#${cmd.id}</strong></td>
                             <td>
-                                <fmt:formatDate value="${cmd.dateCommande}" pattern="dd/MM/yyyy"
+                                <fmt:formatDate value="${cmd.orderDate}" pattern="dd/MM/yyyy"
                                     type="both"/>
                             </td>
                             <td><fmt:formatNumber value="${cmd.total}" type="currency" currencySymbol="$"/></td>
                             <td>
                                 <c:choose>
-                                    <c:when test="${cmd.statut == 'EN_ATTENTE'}">
+                                    <c:when test="${cmd.status == 'PENDING'}">
                                         <span class="badge badge-yellow">En attente</span>
                                     </c:when>
-                                    <c:when test="${cmd.statut == 'CONFIRMEE'}">
+                                    <c:when test="${cmd.status == 'CONFIRMED'}">
                                         <span class="badge badge-green">Confirmée</span>
                                     </c:when>
                                     <c:otherwise>
-                                        <span class="badge badge-blue">${cmd.statut}</span>
+                                        <span class="badge badge-blue">${cmd.status}</span>
                                     </c:otherwise>
                                 </c:choose>
                             </td>

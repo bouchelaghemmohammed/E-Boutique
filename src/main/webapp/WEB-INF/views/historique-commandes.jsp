@@ -7,14 +7,14 @@
 
 <c:if test="${not empty commandeConfirmee}">
     <div class="alert alert-success">
-        Votre commande #<c:out value="${commandeConfirmee}"/> a bien ete enregistree.
-        Un courriel de confirmation vous a ete envoye.
+        Votre commande #<c:out value="${commandeConfirmee}"/> a bien été enregistrée.
+        Un courriel de confirmation vous a été envoyé.
     </div>
 </c:if>
 
 <c:choose>
     <c:when test="${empty commandes}">
-        <p>Vous n'avez encore passe aucune commande.</p>
+        <p>Vous n'avez encore passé aucune commande.</p>
         <p><a class="btn" href="${pageContext.request.contextPath}/catalogue">Voir le catalogue</a></p>
     </c:when>
     <c:otherwise>
@@ -23,31 +23,30 @@
                 <h3>Commande #${commande.id}</h3>
                 <p>
                     <strong>Date :</strong>
-                    <fmt:parseDate value="${commande.dateCommande}" pattern="yyyy-MM-dd'T'HH:mm:ss" var="dateParsee" type="both"/>
-                    <fmt:formatDate value="${dateParsee}" pattern="dd/MM/yyyy HH:mm"/>
+                    <c:out value="${commande.orderDate}"/>
                     &nbsp; &mdash; &nbsp;
-                    <strong>Statut :</strong> <c:out value="${commande.statut}"/>
+                    <strong>Statut :</strong> <c:out value="${commande.status}"/>
                     &nbsp; &mdash; &nbsp;
                     <strong>Total :</strong> <fmt:formatNumber value="${commande.total}" type="currency" currencySymbol="$"/>
                 </p>
-                <p><strong>Livraison :</strong> <c:out value="${commande.adresseLivraison}"/></p>
+                <p><strong>Livraison :</strong> <c:out value="${commande.shippingAddress}"/></p>
 
                 <table>
                     <thead>
                         <tr>
                             <th>Produit</th>
-                            <th>Quantite</th>
+                            <th>Quantité</th>
                             <th>Prix unitaire</th>
                             <th>Sous-total</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <c:forEach var="ligne" items="${commande.lignes}">
+                        <c:forEach var="item" items="${commande.items}">
                             <tr>
-                                <td><c:out value="${ligne.produit.nom}"/></td>
-                                <td>${ligne.quantite}</td>
-                                <td><fmt:formatNumber value="${ligne.prixUnitaire}" type="currency" currencySymbol="$"/></td>
-                                <td><fmt:formatNumber value="${ligne.sousTotal}" type="currency" currencySymbol="$"/></td>
+                                <td><c:out value="${item.product.name}"/></td>
+                                <td>${item.quantity}</td>
+                                <td><fmt:formatNumber value="${item.unitPrice}" type="currency" currencySymbol="$"/></td>
+                                <td><fmt:formatNumber value="${item.sousTotal}" type="currency" currencySymbol="$"/></td>
                             </tr>
                         </c:forEach>
                     </tbody>

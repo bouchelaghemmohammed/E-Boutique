@@ -1,87 +1,139 @@
--- ==============================================================
---  E-Boutique — Script de création de la base de données MySQL
---  Utilisateur : root / root
---  Base        : eboutique
--- ==============================================================
-
-CREATE DATABASE IF NOT EXISTS eboutique
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-
+-- =====================================================
+-- E-Boutique — Schéma de base de données
+-- SGBD cible : MySQL 8.x
+-- =====================================================
+ 
+DROP DATABASE IF EXISTS eboutique;
+CREATE DATABASE eboutique CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE eboutique;
-
--- --------------------------------------------------------------
--- Table : utilisateurs
--- --------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS utilisateurs (
-    id               BIGINT AUTO_INCREMENT PRIMARY KEY,
-    prenom           VARCHAR(80)  NOT NULL,
-    nom              VARCHAR(80)  NOT NULL,
-    email            VARCHAR(150) NOT NULL UNIQUE,
-    mot_de_passe_hash VARCHAR(72)  NOT NULL,          -- hash BCrypt ($2a$...)
-    role             ENUM('USER','ADMIN') NOT NULL DEFAULT 'USER',
-    actif            BOOLEAN      NOT NULL DEFAULT TRUE,
-    telephone        VARCHAR(20),
-    adresse          TEXT,
-    cree_le          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Compte administrateur par défaut (mdp: admin1234)
-INSERT IGNORE INTO utilisateurs (prenom, nom, email, mot_de_passe_hash, role)
-VALUES ('Admin', 'E-Boutique', 'admin@eboutique.com',
-        '$2a$12$aTn3QGLqtlP0Vm23ZvJSLuyvd5VqxJiaCwU2CXhvhFe.PFl9pPV5W', 'ADMIN');
-
--- --------------------------------------------------------------
--- Table : produits
--- --------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS produits (
-    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
-    nom          VARCHAR(150) NOT NULL,
+ 
+-- -----------------------------------------------------
+-- Table : roles
+-- -----------------------------------------------------
+CREATE TABLE roles (
+    id          BIGINT       AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(20)  NOT NULL UNIQUE
+) ENGINE=InnoDB;
+ 
+-- -----------------------------------------------------
+-- Table : users
+-- -----------------------------------------------------
+CREATE TABLE users (
+    id              BIGINT        AUTO_INCREMENT PRIMARY KEY,
+    email           VARCHAR(150)  NOT NULL UNIQUE,
+    password_hash   VARCHAR(255)  NOT NULL,         -- BCrypt
+    first_name      VARCHAR(80)   NOT NULL,
+    last_name       VARCHAR(80)   NOT NULL,
+    role_id         BIGINT        NOT NULL,
+    enabled         BOOLEAN       NOT NULL DEFAULT TRUE,
+    created_at      TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user_role FOREIGN KEY (role_id) REFERENCES roles(id)
+) ENGINE=InnoDB;
+ 
+CREATE INDEX idx_users_email ON users(email);
+ 
+-- -----------------------------------------------------
+-- Table : categories
+-- -----------------------------------------------------
+CREATE TABLE categories (
+    id          BIGINT        AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(80)   NOT NULL UNIQUE,
+    description VARCHAR(255)
+) ENGINE=InnoDB;
+ 
+-- -----------------------------------------------------
+-- Table : products
+-- -----------------------------------------------------
+CREATE TABLE products (
+    id           BIGINT         AUTO_INCREMENT PRIMARY KEY,
+    name         VARCHAR(150)   NOT NULL,
     description  TEXT,
-    prix         DECIMAL(10,2) NOT NULL,
-    stock        INT          NOT NULL DEFAULT 0,
-    categorie    VARCHAR(80),
-    chemin_image VARCHAR(255)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Données de démonstration
-INSERT IGNORE INTO produits (nom, description, prix, stock, categorie) VALUES
-('Laptop Pro 15"', 'Ordinateur portable haute performance 15 pouces, Core i7, 16GB RAM', 1299.99, 25, 'Informatique'),
-('Smartphone X12',  'Smartphone Android 5G, 128GB, triple caméra 108MP',              799.99, 50, 'Téléphonie'),
-('Casque Audio BT', 'Casque Bluetooth sans fil, réduction de bruit active, 30h autonomie', 149.99, 100, 'Audio'),
-('Clavier Mécanique', 'Clavier gaming RGB, switches Cherry MX Red, disposition AZERTY', 89.99, 75, 'Périphériques'),
-('Écran 27" 4K',    'Moniteur 4K UHD 27 pouces, dalle IPS, 144Hz, HDR400',           449.99, 30, 'Écrans'),
-('Souris Gaming',   'Souris gaming optique 16000 DPI, 6 boutons programmables, RGB',    59.99, 120, 'Périphériques');
-
--- --------------------------------------------------------------
--- Table : commandes
--- --------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS commandes (
-    id                BIGINT AUTO_INCREMENT PRIMARY KEY,
-    utilisateur_id    BIGINT        NOT NULL,
-    date_commande     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    total             DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    statut            ENUM('EN_ATTENTE','CONFIRMEE','EXPEDIEE','LIVREE','ANNULEE')
-                        NOT NULL DEFAULT 'EN_ATTENTE',
-    adresse_livraison TEXT          NOT NULL,
-    CONSTRAINT fk_commandes_utilisateur
-        FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------------
--- Table : lignes_commande
--- --------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS lignes_commande (
-    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
-    commande_id BIGINT        NOT NULL,
-    produit_id  BIGINT        NOT NULL,
-    quantite    INT           NOT NULL DEFAULT 1,
-    prix_unitaire DECIMAL(10,2) NOT NULL,
-    CONSTRAINT fk_lc_commande
-        FOREIGN KEY (commande_id) REFERENCES commandes(id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_lc_produit
-        FOREIGN KEY (produit_id) REFERENCES produits(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    price        DECIMAL(10,2)  NOT NULL CHECK (price >= 0),
+    stock        INT            NOT NULL DEFAULT 0 CHECK (stock >= 0),
+    image_path   VARCHAR(255),                       -- chemin relatif vers /assets/products/
+    category_id  BIGINT,
+    created_at   TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_product_category FOREIGN KEY (category_id)
+        REFERENCES categories(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+ 
+CREATE INDEX idx_products_name     ON products(name);
+CREATE INDEX idx_products_category ON products(category_id);
+ 
+-- -----------------------------------------------------
+-- Table : orders
+-- -----------------------------------------------------
+CREATE TABLE orders (
+    id                BIGINT         AUTO_INCREMENT PRIMARY KEY,
+    user_id           BIGINT         NOT NULL,
+    order_date        TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    total             DECIMAL(10,2)  NOT NULL CHECK (total >= 0),
+    status            VARCHAR(20)    NOT NULL DEFAULT 'PENDING',
+                                     -- PENDING / CONFIRMED / SHIPPED / CANCELLED
+    shipping_address  VARCHAR(255)   NOT NULL,
+    CONSTRAINT fk_order_user FOREIGN KEY (user_id)
+        REFERENCES users(id) ON DELETE RESTRICT
+) ENGINE=InnoDB;
+ 
+CREATE INDEX idx_orders_user ON orders(user_id);
+CREATE INDEX idx_orders_date ON orders(order_date);
+ 
+-- -----------------------------------------------------
+-- Table : order_items
+-- (snapshot du prix au moment de la commande — important !)
+-- -----------------------------------------------------
+CREATE TABLE order_items (
+    id          BIGINT         AUTO_INCREMENT PRIMARY KEY,
+    order_id    BIGINT         NOT NULL,
+    product_id  BIGINT         NOT NULL,
+    quantity    INT            NOT NULL CHECK (quantity > 0),
+    unit_price  DECIMAL(10,2)  NOT NULL CHECK (unit_price >= 0),
+    CONSTRAINT fk_oi_order   FOREIGN KEY (order_id)
+        REFERENCES orders(id) ON DELETE CASCADE,
+    CONSTRAINT fk_oi_product FOREIGN KEY (product_id)
+        REFERENCES products(id) ON DELETE RESTRICT
+) ENGINE=InnoDB;
+ 
+CREATE INDEX idx_oi_order ON order_items(order_id);
+ 
+-- -----------------------------------------------------
+-- Table : coupons (BONUS — coupons de réduction)
+-- -----------------------------------------------------
+CREATE TABLE coupons (
+    id                BIGINT        AUTO_INCREMENT PRIMARY KEY,
+    code              VARCHAR(40)   NOT NULL UNIQUE,
+    discount_percent  INT           NOT NULL CHECK (discount_percent BETWEEN 1 AND 100),
+    valid_until       DATE          NOT NULL,
+    active            BOOLEAN       NOT NULL DEFAULT TRUE
+) ENGINE=InnoDB;
+ 
+-- =====================================================
+-- Données initiales
+-- =====================================================
+ 
+INSERT INTO roles (name) VALUES ('ADMIN'), ('USER');
+ 
+-- Compte admin par défaut
+-- mot de passe = "admin123"
+INSERT INTO users (email, password_hash, first_name, last_name, role_id)
+VALUES (
+  'admin@eboutique.com',
+  '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+  'Admin', 'Root',
+  (SELECT id FROM roles WHERE name = 'ADMIN')
+);
+ 
+INSERT INTO categories (name, description) VALUES
+  ('Livres',       'Romans, BD, manuels'),
+  ('Électronique', 'Accessoires informatiques et téléphonie'),
+  ('Vêtements',    'Mode homme et femme');
+ 
+INSERT INTO products (name, description, price, stock, category_id) VALUES
+  ('Clavier mécanique RGB', 'Clavier gaming switch bleu',           89.99, 25,
+     (SELECT id FROM categories WHERE name='Électronique')),
+  ('Souris sans fil',       'Bluetooth, autonomie 6 mois',          29.50, 60,
+     (SELECT id FROM categories WHERE name='Électronique')),
+  ('T-shirt Java',          'Coton bio, taille M',                  19.99, 100,
+     (SELECT id FROM categories WHERE name='Vêtements')),
+  ('Effective Java',        'Joshua Bloch, 3e édition',             45.00, 15,
+     (SELECT id FROM categories WHERE name='Livres'));

@@ -28,14 +28,20 @@
         </a>
 
         <div class="navbar__links">
-            <a href="${pageContext.request.contextPath}/dashboard"
-               class="${pageContext.request.servletPath.contains('dashboard') ? 'active' : ''}">
+            <a href="${pageContext.request.contextPath}/accueil"
+               class="${pageContext.request.servletPath.contains('accueil') || pageContext.request.servletPath.equals('/') ? 'active' : ''}">
                 🏠 Accueil
             </a>
             <a href="${pageContext.request.contextPath}/catalogue"
                class="${pageContext.request.servletPath.contains('catalogue') ? 'active' : ''}">
-                🛒 Catalogue
+                📦 Catalogue
             </a>
+            <c:if test="${not empty utilisateurConnecte}">
+                <a href="${pageContext.request.contextPath}/dashboard"
+                   class="${pageContext.request.servletPath.contains('dashboard') ? 'active' : ''}">
+                    📊 Dashboard
+                </a>
+            </c:if>
             <c:if test="${not empty utilisateurConnecte && utilisateurConnecte.admin}">
                 <a href="${pageContext.request.contextPath}/admin/produits"
                    class="${pageContext.request.servletPath.contains('admin') ? 'active' : ''}">
@@ -64,9 +70,9 @@
                     <%-- Profil utilisateur --%>
                     <a href="${pageContext.request.contextPath}/profil" class="user-chip">
                         <span class="avatar">
-                            <c:out value="${utilisateurConnecte.prenom.substring(0,1).toUpperCase()}"/>
+                            <c:out value="${utilisateurConnecte.firstName.substring(0,1).toUpperCase()}"/>
                         </span>
-                        <c:out value="${utilisateurConnecte.prenom}"/>
+                        <c:out value="${utilisateurConnecte.firstName}"/>
                         <c:if test="${utilisateurConnecte.admin}">
                             &nbsp;<span class="badge badge-admin">Admin</span>
                         </c:if>

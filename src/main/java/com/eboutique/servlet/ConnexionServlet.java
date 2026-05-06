@@ -1,7 +1,7 @@
 package com.eboutique.servlet;
 
-import com.eboutique.modele.Utilisateur;
-import com.eboutique.service.UtilisateurService;
+import com.eboutique.modele.User;
+import com.eboutique.service.UserService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -16,8 +16,6 @@ import java.util.Optional;
 
 /**
  * Servlet de connexion (GET + POST /connexion).
- * GET : affiche le formulaire de login (prérempli via cookie remember-me).
- * POST : authentifie, stocke l'utilisateur en session, gère le cookie.
  */
 @WebServlet(name = "ConnexionServlet", urlPatterns = { "/connexion" })
 public class ConnexionServlet extends HttpServlet {
@@ -25,26 +23,23 @@ public class ConnexionServlet extends HttpServlet {
     private static final String COOKIE_REMEMBER = "remember_me";
     private static final int COOKIE_MAX_AGE = 30 * 24 * 3600; // 30 jours
 
-    private final UtilisateurService utilisateurService = new UtilisateurService();
+    private final UserService userService = new UserService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // Si déjà connecté, rediriger vers le dashboard
         HttpSession session = req.getSession(false);
         if (session != null && session.getAttribute("utilisateurConnecte") != null) {
             resp.sendRedirect(req.getContextPath() + "/dashboard");
             return;
         }
 
-        // Lire cookie remember-me pour préremplir l'email
         String courrielSauvegarde = lireCookieRememberMe(req);
         if (courrielSauvegarde != null) {
             req.setAttribute("courrielSauvegarde", courrielSauvegarde);
         }
 
-        // Message de succès depuis l'inscription
         HttpSession sess = req.getSession(false);
         if (sess != null) {
             String msg = (String) sess.getAttribute("messageSucces");
@@ -68,35 +63,31 @@ public class ConnexionServlet extends HttpServlet {
         String rememberMe = req.getParameter("rememberMe");
         String redirect = req.getParameter("redirect");
 
-        Optional<Utilisateur> optUtil = utilisateurService.connecter(courriel, motDePasse);
+        Optional<User> optUser = userService.connecter(courriel, motDePasse);
 
-        if (optUtil.isEmpty()) {
+        if (optUser.isEmpty()) {
             req.setAttribute("erreur", "Identifiants incorrects. Vérifiez votre courriel et mot de passe.");
             req.setAttribute("courriel", courriel);
             req.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(req, resp);
             return;
         }
 
-        Utilisateur utilisateur = optUtil.get();
+        User user = optUser.get();
 
-        // Créer la session
         HttpSession session = req.getSession(true);
-        session.setAttribute("utilisateurConnecte", utilisateur);
-        session.setMaxInactiveInterval(30 * 60); // 30 min
+        session.setAttribute("utilisateurConnecte", user);
+        session.setMaxInactiveInterval(30 * 60);
 
-        // Gérer le cookie remember-me
         if ("on".equals(rememberMe) || "true".equals(rememberMe)) {
-            Cookie cookie = new Cookie(COOKIE_REMEMBER, utilisateur.getEmail());
+            Cookie cookie = new Cookie(COOKIE_REMEMBER, user.getEmail());
             cookie.setMaxAge(COOKIE_MAX_AGE);
             cookie.setPath(req.getContextPath().isEmpty() ? "/" : req.getContextPath());
             cookie.setHttpOnly(true);
             resp.addCookie(cookie);
         } else {
-            // Supprimer le cookie s'il existe
             supprimerCookieRememberMe(req, resp);
         }
 
-        // Rediriger vers l'URL demandée ou le dashboard
         if (redirect != null && !redirect.isBlank() && redirect.startsWith("/")) {
             resp.sendRedirect(req.getContextPath() + redirect);
         } else {
@@ -106,20 +97,16 @@ public class ConnexionServlet extends HttpServlet {
 
     private String lireCookieRememberMe(HttpServletRequest req) {
         Cookie[] cookies = req.getCookies();
-        if (cookies == null)
-            return null;
+        if (cookies == null) return null;
         for (Cookie c : cookies) {
-            if (COOKIE_REMEMBER.equals(c.getName())) {
-                return c.getValue();
-            }
+            if (COOKIE_REMEMBER.equals(c.getName())) return c.getValue();
         }
         return null;
     }
 
     private void supprimerCookieRememberMe(HttpServletRequest req, HttpServletResponse resp) {
         Cookie[] cookies = req.getCookies();
-        if (cookies == null)
-            return;
+        if (cookies == null) return;
         for (Cookie c : cookies) {
             if (COOKIE_REMEMBER.equals(c.getName())) {
                 c.setMaxAge(0);

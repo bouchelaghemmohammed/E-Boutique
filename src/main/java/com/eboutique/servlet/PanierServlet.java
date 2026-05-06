@@ -1,7 +1,7 @@
 package com.eboutique.servlet;
 
 import com.eboutique.modele.Panier;
-import com.eboutique.modele.Produit;
+import com.eboutique.modele.Product;
 import com.eboutique.util.JpaUtil;
 
 import jakarta.persistence.EntityManager;
@@ -56,7 +56,7 @@ public class PanierServlet extends HttpServlet {
         Panier panier = getPanier(req);
         EntityManager em = JpaUtil.getEntityManager();
         try {
-            Produit produit = em.find(Produit.class, produitId);
+            Product produit = em.find(Product.class, produitId);
             if (produit != null) {
                 panier.ajouterArticle(produit, quantite);
             }

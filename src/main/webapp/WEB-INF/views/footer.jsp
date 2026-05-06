@@ -2,14 +2,18 @@
     </div><!-- /.container -->
 </main>
 
-<footer>
-    <div class="footer__brand">🛍 E-Boutique</div>
-    <p>Application e-commerce Jakarta EE &bull; Programmation Web Serveur III &bull; Mohammed - Emile - Aicha </p>
-    <p style="margin-top:0.5rem;">
-        <a href="${pageContext.request.contextPath}/catalogue">Catalogue</a> &bull;
-        <a href="${pageContext.request.contextPath}/panier">Panier</a> &bull;
-        <a href="${pageContext.request.contextPath}/profil">Mon Profil</a>
-    </p>
+<footer class="footer-simple">
+    <div class="container">
+        <div class="footer-simple__links">
+            <a href="${pageContext.request.contextPath}/accueil">Accueil</a>
+            <a href="${pageContext.request.contextPath}/catalogue">Catalogue</a>
+            <a href="${pageContext.request.contextPath}/panier">Panier</a>
+            <a href="${pageContext.request.contextPath}/connexion">Connexion</a>
+        </div>
+        <div class="footer-simple__copy">
+            <p>&copy; 2026 E-Boutique. Tous droits réservés - MOHAMMED - EMILE - AICHA</p>
+        </div>
+    </div>
 </footer>
 
 </body>

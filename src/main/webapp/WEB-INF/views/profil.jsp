@@ -10,11 +10,11 @@
          ===================================================== --%>
     <div class="flex items-center gap-2 mb-3 animate-fade">
         <div class="profil-avatar">
-            <c:out value="${utilisateurConnecte.prenom.substring(0,1).toUpperCase()}"/>
+            <c:out value="${utilisateurConnecte.firstName.substring(0,1).toUpperCase()}"/>
         </div>
         <div>
             <h1 style="font-size:1.6rem; font-weight:800; letter-spacing:-0.02em;">
-                <c:out value="${utilisateurConnecte.nomComplet}"/>
+                <c:out value="${utilisateurConnecte.fullName}"/>
             </h1>
             <div class="flex items-center gap-1 mt-1">
                 <span class="text-muted text-sm">
@@ -56,7 +56,7 @@
                     <label class="form-label" for="prenom">Prénom</label>
                     <input type="text" id="prenom" name="prenom"
                            class="form-control"
-                           value="<c:out value='${utilisateurConnecte.prenom}'/>"
+                           value="<c:out value='${utilisateurConnecte.firstName}'/>"
                            required maxlength="80"/>
                 </div>
 
@@ -64,7 +64,7 @@
                     <label class="form-label" for="nom">Nom</label>
                     <input type="text" id="nom" name="nom"
                            class="form-control"
-                           value="<c:out value='${utilisateurConnecte.nom}'/>"
+                           value="<c:out value='${utilisateurConnecte.lastName}'/>"
                            required maxlength="80"/>
                 </div>
 
@@ -74,22 +74,6 @@
                            value="<c:out value='${utilisateurConnecte.email}'/>"
                            disabled style="opacity:0.6; cursor:not-allowed;"/>
                     <span class="form-hint">Le courriel ne peut pas être modifié.</span>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="telephone">Téléphone</label>
-                    <input type="tel" id="telephone" name="telephone"
-                           class="form-control"
-                           value="<c:out value='${utilisateurConnecte.telephone}'/>"
-                           placeholder="+1 514 000-0000"
-                           maxlength="20"/>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="adresse">Adresse de livraison</label>
-                    <textarea id="adresse" name="adresse"
-                              class="form-control" rows="3"
-                              placeholder="123 rue Exemple, Montréal, QC"><c:out value='${utilisateurConnecte.adresse}'/></textarea>
                 </div>
 
                 <button type="submit" class="btn btn-full" id="btn-sauvegarder">
@@ -152,8 +136,7 @@
                         border:1px solid rgba(16,185,129,0.15); border-radius: 8px;">
                 <p class="text-sm text-muted">
                     <strong style="color:var(--green-400);">📅 Membre depuis :</strong><br/>
-                    <fmt:formatDate value="${utilisateurConnecte.dateInscription}"
-                                    pattern="dd MMMM yyyy" type="both"/>
+                    <c:out value="${utilisateurConnecte.createdAt}"/>
                 </p>
             </div>
 

@@ -4,18 +4,19 @@
 
 <div class="auth-page">
     <div class="auth-card animate-slide" style="text-align: center; max-width: 500px;">
-        <div style="font-size: 5rem; margin-bottom: 1rem;">🔍</div>
-        <h1 style="color: var(--green-400); font-weight: 800; margin-bottom: 1rem;">404 — Page Perdue</h1>
+        <div style="font-size: 5rem; margin-bottom: 1rem;">🚫</div>
+        <h1 style="color: var(--red-400); font-weight: 800; margin-bottom: 1rem;">403 — Accès Refusé</h1>
         <p class="text-muted" style="margin-bottom: 2rem;">
-            Désolé, la page que vous recherchez semble avoir disparu dans le cloud ou n'a jamais existé.
+            Désolé, vous n'avez pas les permissions nécessaires pour accéder à cette page. 
+            Cette zone est réservée aux administrateurs.
         </p>
         
         <div class="flex flex-col gap-1">
             <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-full">
-                🏠 Retour à l'accueil
+                🏠 Retour au tableau de bord
             </a>
             <a href="${pageContext.request.contextPath}/catalogue" class="btn btn-outline btn-full">
-                🛒 Voir le catalogue
+                🛒 Continuer mes achats
             </a>
         </div>
     </div>

@@ -3,19 +3,20 @@ package com.eboutique.modele;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-// POJO stocke dans HttpSession - n'est PAS une entite JPA.
-// Utilise une Map<produitId, LignePanier> pour fusionner automatiquement
-// les ajouts du meme produit.
+/**
+ * POJO stocké dans HttpSession - n'est PAS une entité JPA.
+ */
 public class Panier implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private final Map<Long, LignePanier> lignes = new LinkedHashMap<>();
 
-    public void ajouterArticle(Produit produit, int quantite) {
+    public void ajouterArticle(Product produit, int quantite) {
         if (produit == null || quantite <= 0) return;
         LignePanier existante = lignes.get(produit.getId());
         if (existante != null) {
@@ -71,21 +72,11 @@ public class Panier implements Serializable {
         return lignes.values();
     }
 
-    // Convertit le panier en Commande prete a etre persistee.
-    // Le prix unitaire est fige a partir du Produit courant.
-    public Commande versCommande(Utilisateur utilisateur, String adresseLivraison) {
-        Commande commande = new Commande();
-        commande.setUtilisateur(utilisateur);
-        commande.setAdresseLivraison(adresseLivraison);
+    public Map<Long, Integer> getContenuPourService() {
+        Map<Long, Integer> map = new HashMap<>();
         for (LignePanier lp : lignes.values()) {
-            LigneCommande ligne = new LigneCommande(
-                    lp.getProduit(),
-                    lp.getQuantite(),
-                    lp.getProduit().getPrix()
-            );
-            commande.ajouterLigne(ligne);
+            map.put(lp.getProduit().getId(), lp.getQuantite());
         }
-        commande.calculerTotal();
-        return commande;
+        return map;
     }
 }

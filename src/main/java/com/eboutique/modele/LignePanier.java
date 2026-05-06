@@ -3,30 +3,32 @@ package com.eboutique.modele;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-// POJO stocke dans HttpSession - n'est PAS une entite JPA.
+/**
+ * POJO stocké dans HttpSession - n'est PAS une entité JPA.
+ */
 public class LignePanier implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Produit produit;
+    private Product produit;
     private int quantite;
 
     public LignePanier() {}
 
-    public LignePanier(Produit produit, int quantite) {
+    public LignePanier(Product produit, int quantite) {
         this.produit = produit;
         this.quantite = quantite;
     }
 
     public BigDecimal getSousTotal() {
-        if (produit == null || produit.getPrix() == null) {
+        if (produit == null || produit.getPrice() == null) {
             return BigDecimal.ZERO;
         }
-        return produit.getPrix().multiply(BigDecimal.valueOf(quantite));
+        return produit.getPrice().multiply(BigDecimal.valueOf(quantite));
     }
 
-    public Produit getProduit() { return produit; }
-    public void setProduit(Produit produit) { this.produit = produit; }
+    public Product getProduit() { return produit; }
+    public void setProduit(Product produit) { this.produit = produit; }
 
     public int getQuantite() { return quantite; }
     public void setQuantite(int quantite) { this.quantite = quantite; }

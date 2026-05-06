@@ -1,15 +1,11 @@
 package com.eboutique.servlet;
 
-import com.eboutique.dao.CommandeDao;
-import com.eboutique.modele.Commande;
+import com.eboutique.modele.Order;
 import com.eboutique.modele.Panier;
-import com.eboutique.modele.Produit;
-import com.eboutique.modele.Utilisateur;
+import com.eboutique.modele.User;
+import com.eboutique.service.OrderService;
 import com.eboutique.service.MailService;
-import com.eboutique.util.JpaUtil;
 
-import jakarta.mail.MessagingException;
-import jakarta.persistence.EntityManager;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -22,7 +18,7 @@ import java.io.IOException;
 @WebServlet(name = "CheckoutServlet", urlPatterns = {"/checkout"})
 public class CheckoutServlet extends HttpServlet {
 
-    private final CommandeDao commandeDao = new CommandeDao();
+    private final OrderService orderService = new OrderService();
     private final MailService mailService = new MailService();
 
     @Override
@@ -46,13 +42,13 @@ public class CheckoutServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         Panier panier = getPanier(req);
-        Utilisateur utilisateur = getUtilisateurConnecte(req);
+        User user = getUtilisateurConnecte(req);
 
         if (panier == null || panier.estVide()) {
             resp.sendRedirect(req.getContextPath() + "/panier");
             return;
         }
-        if (utilisateur == null) {
+        if (user == null) {
             resp.sendRedirect(req.getContextPath() + "/connexion");
             return;
         }
@@ -65,49 +61,22 @@ public class CheckoutServlet extends HttpServlet {
             return;
         }
 
-        // On rattache les Produit a un EntityManager pour avoir des entites managees.
-        Commande commande = construireCommande(panier, utilisateur, adresse);
-
         try {
-            commandeDao.sauvegarder(commande);
-        } catch (RuntimeException e) {
-            req.setAttribute("erreur", "Erreur lors de l'enregistrement de la commande.");
+            Order order = orderService.passerCommande(user, panier.getContenuPourService(), adresse);
+            
+            try {
+                mailService.envoyerConfirmationCommande(order);
+            } catch (Exception e) {
+                getServletContext().log("Echec envoi email pour commande " + order.getId(), e);
+            }
+
+            panier.vider();
+            resp.sendRedirect(req.getContextPath() + "/historique?confirmee=" + order.getId());
+
+        } catch (Exception e) {
+            req.setAttribute("erreur", "Erreur lors de l'enregistrement de la commande : " + e.getMessage());
             req.setAttribute("panier", panier);
             req.getRequestDispatcher("/WEB-INF/views/checkout.jsp").forward(req, resp);
-            return;
-        }
-
-        // Email de confirmation - n'echoue pas la commande si l'envoi plante.
-        try {
-            mailService.envoyerConfirmationCommande(commande);
-        } catch (MessagingException e) {
-            getServletContext().log("Echec envoi email pour commande " + commande.getId(), e);
-        }
-
-        // Vider le panier apres validation
-        panier.vider();
-
-        resp.sendRedirect(req.getContextPath() + "/historique?confirmee=" + commande.getId());
-    }
-
-    private Commande construireCommande(Panier panier, Utilisateur utilisateur, String adresse) {
-        EntityManager em = JpaUtil.getEntityManager();
-        try {
-            Utilisateur utilisateurManaged = em.find(Utilisateur.class, utilisateur.getId());
-            Commande commande = new Commande();
-            commande.setUtilisateur(utilisateurManaged);
-            commande.setAdresseLivraison(adresse);
-            for (var lp : panier.getLignes()) {
-                Produit produitManaged = em.find(Produit.class, lp.getProduit().getId());
-                if (produitManaged == null) continue;
-                var ligne = new com.eboutique.modele.LigneCommande(
-                        produitManaged, lp.getQuantite(), produitManaged.getPrix());
-                commande.ajouterLigne(ligne);
-            }
-            commande.calculerTotal();
-            return commande;
-        } finally {
-            em.close();
         }
     }
 
@@ -116,8 +85,8 @@ public class CheckoutServlet extends HttpServlet {
         return session == null ? null : (Panier) session.getAttribute("panier");
     }
 
-    private Utilisateur getUtilisateurConnecte(HttpServletRequest req) {
+    private User getUtilisateurConnecte(HttpServletRequest req) {
         HttpSession session = req.getSession(false);
-        return session == null ? null : (Utilisateur) session.getAttribute("utilisateurConnecte");
+        return session == null ? null : (User) session.getAttribute("utilisateurConnecte");
     }
 }

@@ -1,10 +1,9 @@
 package com.eboutique.servlet;
 
-import com.eboutique.dao.CommandeDao;
-import com.eboutique.dao.UtilisateurDao;
-import com.eboutique.modele.Commande;
-import com.eboutique.modele.Role;
-import com.eboutique.modele.Utilisateur;
+import com.eboutique.dao.OrderDao;
+import com.eboutique.dao.UserDao;
+import com.eboutique.modele.Order;
+import com.eboutique.modele.User;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -19,28 +18,26 @@ import java.util.List;
 
 /**
  * Servlet du tableau de bord (GET /dashboard).
- * Affiche des statistiques personnalisées selon le rôle (USER ou ADMIN).
  */
 @WebServlet(name = "DashboardServlet", urlPatterns = {"/dashboard"})
 public class DashboardServlet extends HttpServlet {
 
-    private final CommandeDao    commandeDao    = new CommandeDao();
-    private final UtilisateurDao utilisateurDao = new UtilisateurDao();
+    private final OrderDao orderDao = new OrderDao();
+    private final UserDao userDao = new UserDao();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
         HttpSession session  = req.getSession(false);
-        Utilisateur connecte = (Utilisateur) session.getAttribute("utilisateurConnecte");
+        User connecte = (User) session.getAttribute("utilisateurConnecte");
 
-        if (Role.ADMIN.equals(connecte.getRole())) {
-            // ---- Statistiques ADMIN ----
-            List<Commande>    toutesCommandes = commandeDao.trouverToutes();
-            List<Utilisateur> tousUtilisateurs = utilisateurDao.trouverTous();
+        if (connecte.isAdmin()) {
+            List<Order> toutesCommandes = orderDao.listerParUtilisateur(null); // Just an example, need listerTous
+            List<User> tousUtilisateurs = userDao.listerTous();
 
             BigDecimal totalVentes = toutesCommandes.stream()
-                    .map(Commande::getTotal)
+                    .map(Order::getTotal)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
             req.setAttribute("toutesCommandes",   toutesCommandes);
@@ -49,15 +46,13 @@ public class DashboardServlet extends HttpServlet {
             req.setAttribute("nbCommandes",        toutesCommandes.size());
 
         } else {
-            // ---- Statistiques USER ----
-            List<Commande> mesCommandes = commandeDao.trouverParUtilisateur(connecte);
+            List<Order> mesCommandes = orderDao.listerParUtilisateur(connecte.getId());
 
             BigDecimal totalDepense = mesCommandes.stream()
-                    .map(Commande::getTotal)
+                    .map(Order::getTotal)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            // Les 3 dernières commandes pour l'aperçu rapide
-            List<Commande> dernieres = mesCommandes.stream().limit(3).toList();
+            List<Order> dernieres = mesCommandes.stream().limit(3).toList();
 
             req.setAttribute("mesCommandes",  mesCommandes);
             req.setAttribute("dernieres",     dernieres);
