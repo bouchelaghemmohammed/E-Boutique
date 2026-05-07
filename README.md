@@ -40,7 +40,7 @@ mysql --version
 | Dev | Branche | Module | Responsabilites |
 |---|---|---|---|
 | Mohammed | `mohammed` | Authentification (Dev A) | Inscription, connexion, sessions, cookie remember-me, profil, filtres `AuthFilter` et `RoleFilter`, entites `Utilisateur` et `Role` |
-| ? | `?` | Catalogue (Dev B) | Liste publique, recherche, detail, CRUD admin produits, entites `Produit` et `Categorie` |
+| Aicha| Aicha | Catalogue (Dev B) | Liste publique, recherche, detail, CRUD admin produits, entites `Produit` et `Categorie` |
 | Emile | `emile` | Panier &amp; Commande (Dev C) | Panier en session, checkout, envoi email, historique, entites `Commande` et `LigneCommande` |
 
 ## Mise en place locale (premiere fois)
