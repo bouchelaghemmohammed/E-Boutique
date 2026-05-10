@@ -132,6 +132,10 @@
                         <javaOpt>-Djava.net.preferIPv4Stack=true</javaOpt>
                         <javaOpt>-Djava.awt.headless=true</javaOpt>
                         <javaOpt>-Djboss.modules.system.pkgs=org.jboss.byteman</javaOpt>
+                        <!-- Connexion MySQL pour dev local (mvn wildfly:run) -->
+                        <javaOpt>-Ddb.url=jdbc:mysql://localhost:3306/eboutique?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true&amp;characterEncoding=UTF-8&amp;useUnicode=true</javaOpt>
+                        <javaOpt>-Ddb.user=root</javaOpt>
+                        <javaOpt>-Ddb.password=root</javaOpt>
                     </javaOpts>
                 </configuration>
             </plugin>
