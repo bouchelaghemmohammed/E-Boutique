@@ -24,14 +24,19 @@ public class MailService {
 
     private static final String SMTP_HOST = env("MAIL_SMTP_HOST", "smtp.gmail.com");
     private static final String SMTP_PORT = env("MAIL_SMTP_PORT", "587");
-    private static final String MAIL_USER = env("MAIL_USERNAME", "b92.mohammed@gmail.com");
-    private static final String MAIL_PASS = env("MAIL_PASSWORD", "uivk zxxa semr dsta");
-    private static final String MAIL_FROM = env("MAIL_FROM", "b92.mohammed@gmail.com");
+    private static final String MAIL_USER = env("MAIL_USERNAME", "");
+    private static final String MAIL_PASS = env("MAIL_PASSWORD", "");
+    private static final String MAIL_FROM = env("MAIL_FROM", "");
 
     public void envoyerConfirmationCommande(Order order) throws MessagingException {
         User client = order.getUser();
         if (client == null || client.getEmail() == null) {
             throw new MessagingException("Destinataire manquant");
+        }
+
+        // Si pas de mot de passe SMTP configuré, on ne tente pas la connexion
+        if (MAIL_PASS == null || MAIL_PASS.isBlank()) {
+            throw new MessagingException("SMTP non configuré (MAIL_PASSWORD manquant)");
         }
 
         Session session = creerSession();
@@ -51,6 +56,10 @@ public class MailService {
         props.put("mail.smtp.port", SMTP_PORT);
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
+        // Timeout de connexion : 5 secondes max pour ne pas bloquer la requête
+        props.put("mail.smtp.connectiontimeout", "5000");
+        props.put("mail.smtp.timeout", "5000");
+        props.put("mail.smtp.writetimeout", "5000");
 
         return Session.getInstance(props, new Authenticator() {
             @Override
