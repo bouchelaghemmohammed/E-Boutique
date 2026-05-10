@@ -1,0 +1,40 @@
+# ─────────────────────────────────────────────────────────────────
+# docker-compose.yml — Test local complet avec Docker
+# Usage : docker compose up --build
+# ─────────────────────────────────────────────────────────────────
+services:
+
+  db:
+    image: mysql:8.3
+    container_name: eboutique-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: eboutique
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: eboutique-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      # JAVA_TOOL_OPTIONS est lu directement par la JVM (pas de eval shell)
+      # Le & dans l'URL JDBC ne pose aucun problème ici
+      JAVA_TOOL_OPTIONS: "-Ddb.url=jdbc:mysql://db:3306/eboutique?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useUnicode=true -Ddb.user=root -Ddb.password=root"
+
+volumes:
+  mysql_data:
