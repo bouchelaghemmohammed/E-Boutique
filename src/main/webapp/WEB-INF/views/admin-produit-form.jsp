@@ -38,7 +38,7 @@
                 <input type="text" id="nom" name="nom"
                        class="form-control"
                        value="<c:out value='${produit.name}'/>"
-                       placeholder="Ex : Clavier mécanique RGB"
+                       placeholder="Nom complet du produit"
                        required maxlength="150"/>
             </div>
 
@@ -91,12 +91,12 @@
         <div class="form-group">
             <label class="form-label" for="imagePath">
                 URL de l'image
-                <span class="form-hint">Lien vers une image en ligne (ex : Unsplash, Imgur…)</span>
+                <span class="form-hint">Lien vers une image en ligne </span>
             </label>
             <input type="url" id="imagePath" name="imagePath"
                    class="form-control"
                    value="<c:out value='${produit.imagePath}'/>"
-                   placeholder="https://images.unsplash.com/…"
+                   placeholder="https://images………….com/"
                    oninput="previewImage(this.value)"/>
         </div>
 

@@ -124,7 +124,7 @@
                     </label>
                     <textarea id="adresseLivraison" name="adresseLivraison"
                               class="form-control" rows="3" required
-                              placeholder="123 rue Exemple, Ville, Province, Code postal"></textarea>
+                              placeholder="123 rue Exemple, Ville, Province, Code postal"><c:out value='${utilisateurConnecte.adresseLivraison}'/></textarea>
                 </div>
                 <div class="alert alert-info" style="font-size:0.85rem; word-break:break-all; overflow-wrap:anywhere; margin-bottom:0;">
                     &#128231; Confirmation &#224; : <strong><c:out value="${utilisateurConnecte.email}"/></strong>

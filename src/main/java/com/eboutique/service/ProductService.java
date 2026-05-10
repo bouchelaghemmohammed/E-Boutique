@@ -14,8 +14,8 @@ public class ProductService {
         return productDao.listerTous();
     }
 
-    public List<Product> rechercherProduits(String nom, Long categorieId) {
-        return productDao.rechercher(nom, categorieId);
+    public List<Product> rechercherProduits(String nom, Long categorieId, String stockFiltre) {
+        return productDao.rechercher(nom, categorieId, stockFiltre);
     }
 
     public Optional<Product> trouverParId(Long id) {

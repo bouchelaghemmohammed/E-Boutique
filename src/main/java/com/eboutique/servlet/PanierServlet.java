@@ -75,6 +75,7 @@ public class PanierServlet extends HttpServlet {
         } finally {
             em.close();
         }
+        sauvegarderCookie(panier, req, resp);
         redirigerVersPanier(req, resp);
     }
 
@@ -85,6 +86,7 @@ public class PanierServlet extends HttpServlet {
         if (produitId != null) {
             panier.modifierQuantite(produitId, quantite);
         }
+        sauvegarderCookie(panier, req, resp);
         redirigerVersPanier(req, resp);
     }
 
@@ -94,12 +96,14 @@ public class PanierServlet extends HttpServlet {
         if (produitId != null) {
             panier.retirerArticle(produitId);
         }
+        sauvegarderCookie(panier, req, resp);
         redirigerVersPanier(req, resp);
     }
 
     private void vider(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Panier panier = getPanier(req);
         panier.vider();
+        sauvegarderCookie(panier, req, resp);
         redirigerVersPanier(req, resp);
     }
 

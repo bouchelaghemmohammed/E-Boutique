@@ -32,9 +32,19 @@
             </c:forEach>
         </select>
 
+        <%-- Dropdown stock --%>
+        <select name="stockFiltre"
+                id="catalogue-stock"
+                class="form-control catalogue-select"
+                onchange="document.getElementById('form-catalogue').submit()">
+            <option value="" <c:if test="${empty stockFiltre}">selected</c:if>>— Disponibilité —</option>
+            <option value="disponible" <c:if test="${stockFiltre == 'disponible'}">selected</c:if>>✅ En stock</option>
+            <option value="rupture"    <c:if test="${stockFiltre == 'rupture'}">selected</c:if>>❌ Rupture de stock</option>
+        </select>
+
         <button type="submit" class="btn">Rechercher</button>
 
-        <c:if test="${not empty q || not empty categorieId}">
+        <c:if test="${not empty q || not empty categorieId || not empty stockFiltre}">
             <a href="${pageContext.request.contextPath}/catalogue" class="btn btn-outline" title="Effacer les filtres">✕</a>
         </c:if>
     </form>

@@ -16,8 +16,9 @@ public class UserService {
     private final RoleDao roleDao = new RoleDao();
 
     public Optional<User> connecter(String email, String motDePasseClair) {
-        if (email == null || motDePasseClair == null) return Optional.empty();
-        
+        if (email == null || motDePasseClair == null)
+            return Optional.empty();
+
         Optional<User> optUser = userDao.trouverParEmail(email.trim());
         if (optUser.isPresent()) {
             User u = optUser.get();
@@ -34,15 +35,15 @@ public class UserService {
         u.setLastName(nom);
         u.setEmail(email.trim().toLowerCase());
         u.setPasswordHash(PasswordHasher.hacher(motDePasseClair));
-        
+
         Role roleUser = roleDao.trouverParNom(NomRole.USER)
                 .orElseThrow(() -> new IllegalStateException("Rôle USER non configuré en base."));
         u.setRole(roleUser);
-        
+
         userDao.ajouter(u);
     }
 
-    public User mettreAJourProfil(Long id, String firstName, String lastName) {
+    public User mettreAJourProfil(Long id, String firstName, String lastName, String email, String adresseLivraison) {
         EntityManager em = JpaUtil.getEntityManager();
         try {
             em.getTransaction().begin();
@@ -50,11 +51,18 @@ public class UserService {
             if (u != null) {
                 u.setFirstName(firstName);
                 u.setLastName(lastName);
+                if (email != null && !email.isBlank()) {
+                    u.setEmail(email.trim().toLowerCase());
+                }
+                if (adresseLivraison != null) {
+                    u.setAdresseLivraison(adresseLivraison.isBlank() ? null : adresseLivraison.trim());
+                }
             }
             em.getTransaction().commit();
             return u;
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
             throw e;
         } finally {
             em.close();
@@ -74,7 +82,8 @@ public class UserService {
             }
             em.getTransaction().commit();
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
             throw e;
         } finally {
             em.close();

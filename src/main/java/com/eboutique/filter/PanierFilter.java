@@ -1,15 +1,17 @@
 package com.eboutique.filter;
 
+import com.eboutique.modele.Panier;
+import com.eboutique.servlet.PanierServlet;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
 /**
- * Filtre panier — le panier est désormais géré uniquement en HttpSession.
- * Ce filtre se contente de laisser passer les requêtes (hors ressources
- * statiques).
+ * Filtre panier — restaure le panier depuis le cookie si la session ne l'a pas.
+ * Cela permet de conserver le panier après déconnexion/reconnexion.
  */
 @WebFilter(filterName = "PanierFilter", urlPatterns = { "/*" })
 public class PanierFilter implements Filter {
@@ -27,6 +29,18 @@ public class PanierFilter implements Filter {
         if (chemin.startsWith("/assets/") || chemin.startsWith("/WEB-INF/")) {
             chain.doFilter(request, response);
             return;
+        }
+
+        // Restaurer le panier depuis le cookie si la session ne l'a pas encore
+        HttpSession session = req.getSession(false);
+        if (session != null && session.getAttribute("panier") == null) {
+            String cookieVal = PanierServlet.lireCookiePanier(req);
+            if (cookieVal != null && !cookieVal.isBlank()) {
+                Panier panierRestaure = PanierServlet.restaurerDepuisCookie(cookieVal);
+                if (!panierRestaure.estVide()) {
+                    session.setAttribute("panier", panierRestaure);
+                }
+            }
         }
 
         chain.doFilter(request, response);
