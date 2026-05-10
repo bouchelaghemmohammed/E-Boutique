@@ -23,7 +23,24 @@
     <div class="alert alert-danger animate-slide">⚠️ <c:out value="${flashError}"/></div>
 </c:if>
 
-<%-- ── Tableau des produits ── --%>
+<%-- ── Filtres stock ── --%>
+<c:if test="${not empty produits}">
+<div class="flex gap-1 mb-2 animate-fade" style="align-items:center; flex-wrap:wrap;">
+    <span class="text-muted text-sm" style="margin-right:0.25rem;">Afficher :</span>
+    <button class="btn btn-sm btn-outline" id="filtre-tous"      onclick="filtrerStock('tous')">
+        📦 Tous
+        <span class="badge badge-green" id="cnt-tous"     style="margin-left:0.3rem;">0</span>
+    </button>
+    <button class="btn btn-sm" id="filtre-limite"   onclick="filtrerStock('limite')" style="background:var(--yellow-500,#eab308);color:#000;">
+        ⚠️ Stock limité (&lt; 5)
+        <span id="cnt-limite"  style="margin-left:0.3rem; font-weight:bold;">0</span>
+    </button>
+    <button class="btn btn-sm btn-danger" id="filtre-rupture"  onclick="filtrerStock('rupture')">
+        ❌ Rupture de stock
+        <span id="cnt-rupture" style="margin-left:0.3rem; font-weight:bold;">0</span>
+    </button>
+</div>
+</c:if>
 <c:choose>
     <c:when test="${not empty produits}">
         <div class="table-wrapper animate-fade">
@@ -39,9 +56,9 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tbody-produits">
                     <c:forEach var="p" items="${produits}">
-                        <tr>
+                        <tr data-stock="${p.stock}">
                             <td class="text-muted">${p.id}</td>
                             <td>
                                 <c:choose>
@@ -115,5 +132,42 @@
         </div>
     </c:otherwise>
 </c:choose>
+
+<script>
+(function () {
+    var tbody = document.getElementById('tbody-produits');
+    if (!tbody) return;
+
+    var rows = Array.from(tbody.querySelectorAll('tr'));
+
+    // Compter les produits par catégorie de stock
+    var cntTous    = rows.length;
+    var cntLimite  = rows.filter(function(r){ var s = parseInt(r.dataset.stock, 10); return s > 0 && s < 5; }).length;
+    var cntRupture = rows.filter(function(r){ return parseInt(r.dataset.stock, 10) <= 0; }).length;
+
+    document.getElementById('cnt-tous').textContent    = cntTous;
+    document.getElementById('cnt-limite').textContent  = cntLimite;
+    document.getElementById('cnt-rupture').textContent = cntRupture;
+
+    window.filtrerStock = function(mode) {
+        rows.forEach(function(r) {
+            var stock = parseInt(r.dataset.stock, 10);
+            var visible = true;
+            if (mode === 'limite')  visible = stock > 0 && stock < 5;
+            if (mode === 'rupture') visible = stock <= 0;
+            r.style.display = visible ? '' : 'none';
+        });
+
+        // Mettre à jour l'apparence des boutons actifs
+        document.getElementById('filtre-tous').classList.toggle('btn-outline', mode !== 'tous');
+        document.getElementById('filtre-tous').style.opacity = mode === 'tous' ? '1' : '0.6';
+        document.getElementById('filtre-limite').style.opacity  = mode === 'limite'  ? '1' : '0.6';
+        document.getElementById('filtre-rupture').style.opacity = mode === 'rupture' ? '1' : '0.6';
+    };
+
+    // Par défaut : afficher tous
+    filtrerStock('tous');
+})();
+</script>
 
 <jsp:include page="footer.jsp"/>
