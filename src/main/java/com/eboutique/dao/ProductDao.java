@@ -22,10 +22,9 @@ public class ProductDao {
     }
 
     /**
-     * Recherche des produits par nom (LIKE), catégorie et filtre stock.
-     * stockFiltre: "disponible" (stock>0), "rupture" (stock=0), null/vide = tous.
+     * Recherche par nom (LIKE) et/ou catégorie. Les paramètres null sont ignorés.
      */
-    public List<Product> rechercher(String nom, Long categorieId, String stockFiltre) {
+    public List<Product> rechercher(String nom, Long categorieId) {
         EntityManager em = JpaUtil.getEntityManager();
         try {
             StringBuilder jpql = new StringBuilder(
@@ -34,10 +33,6 @@ public class ProductDao {
                 jpql.append(" AND LOWER(p.name) LIKE LOWER(:nom)");
             if (categorieId != null)
                 jpql.append(" AND p.category.id = :catId");
-            if ("disponible".equals(stockFiltre))
-                jpql.append(" AND p.stock > 0");
-            else if ("rupture".equals(stockFiltre))
-                jpql.append(" AND p.stock <= 0");
             jpql.append(" ORDER BY p.name");
 
             TypedQuery<Product> q = em.createQuery(jpql.toString(), Product.class);
