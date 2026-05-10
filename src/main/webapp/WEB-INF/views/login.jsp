@@ -120,14 +120,14 @@ pageEncoding="UTF-8" %> <%@ taglib prefix="c" uri="jakarta.tags.core" %>
             class="btn btn-outline btn-demo"
             onclick="connecterDemo('admin@gmail.com', '123')"
           >
-            👑 Admin démo
+            👑 Admin
           </button>
           <button
             type="button"
             class="btn btn-outline btn-demo"
             onclick="connecterDemo('user@gmail.com', '123')"
           >
-            👤 Utilisateur démo
+            👤 Utilisateur
           </button>
         </div>
 

@@ -22,10 +22,10 @@ public class ProductDao {
     }
 
     /**
-     * Recherche des produits par nom (LIKE) et/ou catégorie.
-     * Les paramètres null ou vides sont ignorés.
+     * Recherche des produits par nom (LIKE), catégorie et filtre stock.
+     * stockFiltre: "disponible" (stock>0), "rupture" (stock=0), null/vide = tous.
      */
-    public List<Product> rechercher(String nom, Long categorieId) {
+    public List<Product> rechercher(String nom, Long categorieId, String stockFiltre) {
         EntityManager em = JpaUtil.getEntityManager();
         try {
             StringBuilder jpql = new StringBuilder(
@@ -34,6 +34,10 @@ public class ProductDao {
                 jpql.append(" AND LOWER(p.name) LIKE LOWER(:nom)");
             if (categorieId != null)
                 jpql.append(" AND p.category.id = :catId");
+            if ("disponible".equals(stockFiltre))
+                jpql.append(" AND p.stock > 0");
+            else if ("rupture".equals(stockFiltre))
+                jpql.append(" AND p.stock <= 0");
             jpql.append(" ORDER BY p.name");
 
             TypedQuery<Product> q = em.createQuery(jpql.toString(), Product.class);
@@ -108,7 +112,8 @@ public class ProductDao {
         EntityManager em = JpaUtil.getEntityManager();
         try {
             return em.createQuery(
-                    "SELECT c FROM Category c ORDER BY c.name", Category.class)
+                    "SELECT c FROM Category c ORDER BY CASE WHEN c.name = 'Autre' THEN 1 ELSE 0 END, c.name",
+                    Category.class)
                     .getResultList();
         } finally {
             em.close();

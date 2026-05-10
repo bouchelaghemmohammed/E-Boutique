@@ -55,7 +55,7 @@ pageEncoding="UTF-8" %> <%@ taglib prefix="c" uri="jakarta.tags.core" %>
                 name="prenom"
                 class="form-control"
                 value="<c:out value='${prenom}'/>"
-                placeholder="Mohammed"
+                placeholder="Saisir votre prénom"
                 required
                 maxlength="80"
               />
@@ -70,7 +70,7 @@ pageEncoding="UTF-8" %> <%@ taglib prefix="c" uri="jakarta.tags.core" %>
                 name="nom"
                 class="form-control"
                 value="<c:out value='${nom}'/>"
-                placeholder="Bouchelaghem"
+                placeholder="Saisir votre nom"
                 required
                 maxlength="80"
               />
@@ -87,7 +87,7 @@ pageEncoding="UTF-8" %> <%@ taglib prefix="c" uri="jakarta.tags.core" %>
               name="courriel"
               class="form-control"
               value="<c:out value='${email}'/>"
-              placeholder="mohammed@gmail.com"
+              placeholder="saisir votre adresse courriel"
               required
               maxlength="150"
             />
@@ -105,9 +105,9 @@ pageEncoding="UTF-8" %> <%@ taglib prefix="c" uri="jakarta.tags.core" %>
                 class="form-control"
                 placeholder="••••••••"
                 required
-                minlength="6"
+                minlength="3"
               />
-              <span class="form-hint">Minimum 6 caractères</span>
+              <span class="form-hint">Minimum 3 caractères</span>
             </div>
             <div class="form-group">
               <label class="form-label" for="motDePasseConfirm">
@@ -120,7 +120,7 @@ pageEncoding="UTF-8" %> <%@ taglib prefix="c" uri="jakarta.tags.core" %>
                 class="form-control"
                 placeholder="••••••••"
                 required
-                minlength="6"
+                minlength="3"
               />
             </div>
           </div>

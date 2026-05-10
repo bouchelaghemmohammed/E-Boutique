@@ -15,7 +15,7 @@ import java.io.IOException;
 /**
  * Servlet du profil utilisateur (GET + POST /profil).
  */
-@WebServlet(name = "ProfilServlet", urlPatterns = {"/profil"})
+@WebServlet(name = "ProfilServlet", urlPatterns = { "/profil" })
 public class ProfilServlet extends HttpServlet {
 
     private final UserService userService = new UserService();
@@ -38,12 +38,14 @@ public class ProfilServlet extends HttpServlet {
         String action = req.getParameter("action");
         String firstName = req.getParameter("prenom");
         String lastName = req.getParameter("nom");
+        String email = req.getParameter("email");
+        String adresseLivraison = req.getParameter("adresseLivraison");
 
         try {
             if ("changerMotDePasse".equals(action)) {
-                String ancienMdp  = req.getParameter("ancienMotDePasse");
+                String ancienMdp = req.getParameter("ancienMotDePasse");
                 String nouveauMdp = req.getParameter("nouveauMotDePasse");
-                String confMdp    = req.getParameter("confirmerMotDePasse");
+                String confMdp = req.getParameter("confirmerMotDePasse");
 
                 if (!nouveauMdp.equals(confMdp)) {
                     req.setAttribute("erreurMdp", "Les nouveaux mots de passe ne correspondent pas.");
@@ -54,7 +56,8 @@ public class ProfilServlet extends HttpServlet {
                 req.setAttribute("succesMdp", "Mot de passe modifié avec succès !");
 
             } else {
-                User mis = userService.mettreAJourProfil(connecte.getId(), firstName, lastName);
+                User mis = userService.mettreAJourProfil(connecte.getId(), firstName, lastName, email,
+                        adresseLivraison);
                 session.setAttribute("utilisateurConnecte", mis);
                 req.setAttribute("succesInfos", "Profil mis à jour avec succès !");
             }
