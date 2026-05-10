@@ -24,9 +24,9 @@ public class MailService {
 
     private static final String SMTP_HOST = env("MAIL_SMTP_HOST", "smtp.gmail.com");
     private static final String SMTP_PORT = env("MAIL_SMTP_PORT", "587");
-    private static final String MAIL_USER = env("MAIL_USERNAME", "");
-    private static final String MAIL_PASS = env("MAIL_PASSWORD", "");
-    private static final String MAIL_FROM = env("MAIL_FROM", "noreply@eboutique.com");
+    private static final String MAIL_USER = env("MAIL_USERNAME", "b92.mohammed@gmail.com");
+    private static final String MAIL_PASS = env("MAIL_PASSWORD", "uivk zxxa semr dsta");
+    private static final String MAIL_FROM = env("MAIL_FROM", "b92.mohammed@gmail.com");
 
     public void envoyerConfirmationCommande(Order order) throws MessagingException {
         User client = order.getUser();
@@ -37,7 +37,8 @@ public class MailService {
         Session session = creerSession();
         MimeMessage message = new MimeMessage(session);
         message.setFrom(new InternetAddress(MAIL_FROM));
-        message.setRecipients(Message.RecipientType.TO, client.getEmail());
+        message.setRecipients(Message.RecipientType.TO,
+                InternetAddress.parse(client.getEmail()));
         message.setSubject("Confirmation de votre commande #" + order.getId(), "UTF-8");
         message.setContent(construireCorps(order), "text/html; charset=UTF-8");
 
@@ -70,11 +71,11 @@ public class MailService {
         html.append("<tr><th>Produit</th><th>Quantité</th><th>Prix unitaire</th><th>Sous-total</th></tr>");
         for (OrderItem l : o.getItems()) {
             html.append("<tr>")
-                .append("<td>").append(l.getProduct().getName()).append("</td>")
-                .append("<td>").append(l.getQuantity()).append("</td>")
-                .append("<td>").append(fmt.format(l.getUnitPrice())).append("</td>")
-                .append("<td>").append(fmt.format(l.getSousTotal())).append("</td>")
-                .append("</tr>");
+                    .append("<td>").append(l.getProduct().getName()).append("</td>")
+                    .append("<td>").append(l.getQuantity()).append("</td>")
+                    .append("<td>").append(fmt.format(l.getUnitPrice())).append("</td>")
+                    .append("<td>").append(fmt.format(l.getSousTotal())).append("</td>")
+                    .append("</tr>");
         }
         html.append("</table>");
         html.append("<p><strong>Total : ").append(fmt.format(o.getTotal())).append("</strong></p>");
