@@ -14,8 +14,52 @@ public class OrderDao {
             em.persist(order);
             em.getTransaction().commit();
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
             throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Progression des statuts : PENDING → CONFIRMED → PREPARING → SHIPPED →
+     * DELIVERED.
+     * Retourne true si la mise à jour a réussi.
+     */
+    public boolean mettreAJourStatut(Long orderId, String nouveauStatut) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            Order o = em.find(Order.class, orderId);
+            if (o == null)
+                return false;
+            o.setStatus(nouveauStatut);
+            em.getTransaction().commit();
+            return true;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public Order trouverParId(Long id) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT DISTINCT o FROM Order o " +
+                            "LEFT JOIN FETCH o.user " +
+                            "LEFT JOIN FETCH o.items i " +
+                            "LEFT JOIN FETCH i.product " +
+                            "WHERE o.id = :id",
+                    Order.class)
+                    .setParameter("id", id)
+                    .getSingleResult();
+        } catch (Exception e) {
+            return null;
         } finally {
             em.close();
         }
@@ -25,9 +69,24 @@ public class OrderDao {
         EntityManager em = JpaUtil.getEntityManager();
         try {
             if (userId == null) {
-                return em.createQuery("SELECT o FROM Order o", Order.class).getResultList();
+                // Charge user + items + product en une seule requête (évite
+                // LazyInitializationException)
+                return em.createQuery(
+                        "SELECT DISTINCT o FROM Order o " +
+                                "LEFT JOIN FETCH o.user u " +
+                                "LEFT JOIN FETCH o.items i " +
+                                "LEFT JOIN FETCH i.product " +
+                                "ORDER BY o.orderDate DESC",
+                        Order.class).getResultList();
             }
-            return em.createQuery("SELECT o FROM Order o WHERE o.user.id = :uid", Order.class)
+            return em.createQuery(
+                    "SELECT DISTINCT o FROM Order o " +
+                            "LEFT JOIN FETCH o.user u " +
+                            "LEFT JOIN FETCH o.items i " +
+                            "LEFT JOIN FETCH i.product " +
+                            "WHERE o.user.id = :uid " +
+                            "ORDER BY o.orderDate DESC",
+                    Order.class)
                     .setParameter("uid", userId)
                     .getResultList();
         } finally {

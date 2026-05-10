@@ -13,7 +13,7 @@ import java.io.IOException;
  * Servlet de déconnexion (GET /deconnexion).
  * Invalide la session HTTP et redirige vers la page de connexion.
  */
-@WebServlet(name = "DeconnexionServlet", urlPatterns = {"/deconnexion"})
+@WebServlet(name = "DeconnexionServlet", urlPatterns = { "/deconnexion" })
 public class DeconnexionServlet extends HttpServlet {
 
     @Override
@@ -24,7 +24,8 @@ public class DeconnexionServlet extends HttpServlet {
         if (session != null) {
             session.invalidate();
         }
-
+        // Le cookie panier est intentionnellement conservé pour être
+        // restauré automatiquement lors de la prochaine connexion.
         resp.sendRedirect(req.getContextPath() + "/connexion");
     }
 

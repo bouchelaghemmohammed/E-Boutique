@@ -43,10 +43,23 @@
                 </a>
             </c:if>
             <c:if test="${not empty utilisateurConnecte && utilisateurConnecte.admin}">
-                <a href="${pageContext.request.contextPath}/admin/produits"
-                   class="${pageContext.request.servletPath.contains('admin') ? 'active' : ''}">
-                    ⚙️ Admin
-                </a>
+                <div class="navbar__dropdown">
+                    <button class="navbar__dropdown-btn
+                        ${pageContext.request.servletPath.contains('admin') ? 'active' : ''}">
+                        &#9881;&#65039; Admin &#9660;
+                    </button>
+                    <div class="navbar__dropdown-menu">
+                        <a href="${pageContext.request.contextPath}/admin/produits">
+                            &#128230; Produits
+                        </a>
+                        <a href="${pageContext.request.contextPath}/admin/commandes">
+                            &#128666; Commandes
+                        </a>
+                        <a href="${pageContext.request.contextPath}/admin/coupons">
+                            &#127915; Coupons
+                        </a>
+                    </div>
+                </div>
             </c:if>
         </div>
 
@@ -79,6 +92,7 @@
                     </a>
 
                     <a href="${pageContext.request.contextPath}/deconnexion"
+                       onclick="localStorage.removeItem('panier_data')"
                        class="btn btn-outline btn-sm">Déconnexion</a>
                 </c:when>
                 <c:otherwise>
@@ -109,6 +123,25 @@
         const isDark = document.body.classList.contains('dark-mode');
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
     });
+</script>
+
+<%-- Sync panier vers localStorage (persiste même si le serveur redémarre) --%>
+<script>
+(function() {
+    var d = '';
+    <c:forEach var="lg" items="${sessionScope.panier.lignes}">
+    if (d) d += '|';
+    d += '${lg.produit.id}:${lg.quantite}';
+    </c:forEach>
+    if (d) {
+        // Le serveur a un panier → on met à jour localStorage
+        localStorage.setItem('panier_data', d);
+    } else if (${not empty utilisateurConnecte}) {
+        // Utilisateur connecté mais panier vide côté serveur → on efface localStorage
+        localStorage.removeItem('panier_data');
+    }
+    // Si non connecté et panier serveur vide → on garde localStorage tel quel
+})();
 </script>
 
 <main>

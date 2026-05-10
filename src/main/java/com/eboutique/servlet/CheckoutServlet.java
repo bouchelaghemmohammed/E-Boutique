@@ -14,8 +14,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 
-@WebServlet(name = "CheckoutServlet", urlPatterns = {"/checkout"})
+@WebServlet(name = "CheckoutServlet", urlPatterns = { "/checkout" })
 public class CheckoutServlet extends HttpServlet {
 
     private final OrderService orderService = new OrderService();
@@ -35,6 +36,12 @@ public class CheckoutServlet extends HttpServlet {
         }
 
         req.setAttribute("panier", panier);
+        // Exposer le coupon déjà appliqué (si l'utilisateur revient sur la page)
+        HttpSession sess = req.getSession(false);
+        if (sess != null) {
+            req.setAttribute("couponCode", sess.getAttribute("couponCode"));
+            req.setAttribute("couponReduction", sess.getAttribute("couponReduction"));
+        }
         req.getRequestDispatcher("/WEB-INF/views/checkout.jsp").forward(req, resp);
     }
 
@@ -62,8 +69,15 @@ public class CheckoutServlet extends HttpServlet {
         }
 
         try {
-            Order order = orderService.passerCommande(user, panier.getContenuPourService(), adresse);
-            
+            // Récupérer la réduction coupon depuis la session
+            HttpSession session = req.getSession(false);
+            BigDecimal reduction = BigDecimal.ZERO;
+            if (session != null && session.getAttribute("couponReduction") != null) {
+                reduction = (BigDecimal) session.getAttribute("couponReduction");
+            }
+
+            Order order = orderService.passerCommande(user, panier.getContenuPourService(), adresse, reduction);
+
             try {
                 mailService.envoyerConfirmationCommande(order);
             } catch (Exception e) {
@@ -71,7 +85,16 @@ public class CheckoutServlet extends HttpServlet {
             }
 
             panier.vider();
-            resp.sendRedirect(req.getContextPath() + "/historique?confirmee=" + order.getId());
+            PanierServlet.sauvegarderCookie(panier, req, resp);
+
+            // Nettoyer le coupon de la session
+            if (session != null) {
+                session.removeAttribute("couponCode");
+                session.removeAttribute("couponReduction");
+            }
+
+            req.getSession().setAttribute("_flash_commandeConfirmee", order.getId());
+            resp.sendRedirect(req.getContextPath() + "/historique");
 
         } catch (Exception e) {
             req.setAttribute("erreur", "Erreur lors de l'enregistrement de la commande : " + e.getMessage());

@@ -15,10 +15,12 @@ public class OrderService {
     private final OrderDao orderDao = new OrderDao();
     private final ProductDao productDao = new ProductDao();
 
-    public Order passerCommande(User user, Map<Long, Integer> panier, String adresse) {
+    public Order passerCommande(User user, Map<Long, Integer> panier, String adresse, BigDecimal reduction) {
         if (panier == null || panier.isEmpty()) {
             throw new IllegalArgumentException("Le panier est vide.");
         }
+        if (reduction == null)
+            reduction = BigDecimal.ZERO;
 
         Order order = new Order();
         order.setUser(user);
@@ -30,22 +32,28 @@ public class OrderService {
         for (Map.Entry<Long, Integer> entry : panier.entrySet()) {
             Product p = productDao.trouverParId(entry.getKey())
                     .orElseThrow(() -> new RuntimeException("Produit introuvable : " + entry.getKey()));
-            
+
             OrderItem item = new OrderItem();
             item.setProduct(p);
             item.setQuantity(entry.getValue());
             item.setUnitPrice(p.getPrice());
-            
+
             order.addItem(item);
-            
             BigDecimal ligneTotal = p.getPrice().multiply(new BigDecimal(entry.getValue()));
             total = total.add(ligneTotal);
         }
 
+        // Appliquer la réduction coupon (ne pas descendre en dessous de 0)
+        total = total.subtract(reduction).max(BigDecimal.ZERO);
         order.setTotal(total);
         orderDao.ajouter(order);
-        
+
         return order;
+    }
+
+    /** Surcharge sans coupon (compatibilité) */
+    public Order passerCommande(User user, Map<Long, Integer> panier, String adresse) {
+        return passerCommande(user, panier, adresse, BigDecimal.ZERO);
     }
 
     public List<Order> listerCommandesUtilisateur(Long userId) {

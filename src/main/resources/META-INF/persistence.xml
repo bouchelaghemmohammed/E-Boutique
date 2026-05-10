@@ -13,6 +13,7 @@
         <class>com.eboutique.modele.OrderItem</class>
         <class>com.eboutique.modele.Role</class>
         <class>com.eboutique.modele.Category</class>
+        <class>com.eboutique.modele.Coupon</class>
         
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
 

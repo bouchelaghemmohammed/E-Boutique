@@ -1,5 +1,6 @@
 package com.eboutique.servlet;
 
+import com.eboutique.modele.Panier;
 import com.eboutique.modele.User;
 import com.eboutique.service.UserService;
 
@@ -12,6 +13,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 /**
@@ -74,12 +78,31 @@ public class ConnexionServlet extends HttpServlet {
 
         User user = optUser.get();
 
+        // Lire les données panier depuis sessionStorage (envoyées via champ caché du
+        // formulaire)
+        String cookieVal = req.getParameter("sessionPanier");
+
+        // Invalider l'ancienne session et en créer une nouvelle (protection session
+        // fixation)
+        HttpSession oldSession = req.getSession(false);
+        if (oldSession != null) {
+            oldSession.invalidate();
+        }
         HttpSession session = req.getSession(true);
         session.setAttribute("utilisateurConnecte", user);
         session.setMaxInactiveInterval(30 * 60);
 
+        // Toujours restaurer le panier depuis le cookie (la nouvelle session est vide)
+        if (cookieVal != null && !cookieVal.isBlank()) {
+            Panier panier = PanierServlet.restaurerDepuisCookie(cookieVal);
+            if (!panier.estVide()) {
+                session.setAttribute("panier", panier);
+            }
+        }
+
         if ("on".equals(rememberMe) || "true".equals(rememberMe)) {
-            Cookie cookie = new Cookie(COOKIE_REMEMBER, user.getEmail());
+            String encoded = URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8);
+            Cookie cookie = new Cookie(COOKIE_REMEMBER, encoded);
             cookie.setMaxAge(COOKIE_MAX_AGE);
             cookie.setPath(req.getContextPath().isEmpty() ? "/" : req.getContextPath());
             cookie.setHttpOnly(true);
@@ -97,16 +120,24 @@ public class ConnexionServlet extends HttpServlet {
 
     private String lireCookieRememberMe(HttpServletRequest req) {
         Cookie[] cookies = req.getCookies();
-        if (cookies == null) return null;
+        if (cookies == null)
+            return null;
         for (Cookie c : cookies) {
-            if (COOKIE_REMEMBER.equals(c.getName())) return c.getValue();
+            if (COOKIE_REMEMBER.equals(c.getName())) {
+                try {
+                    return URLDecoder.decode(c.getValue(), StandardCharsets.UTF_8);
+                } catch (Exception e) {
+                    return c.getValue();
+                }
+            }
         }
         return null;
     }
 
     private void supprimerCookieRememberMe(HttpServletRequest req, HttpServletResponse resp) {
         Cookie[] cookies = req.getCookies();
-        if (cookies == null) return;
+        if (cookies == null)
+            return;
         for (Cookie c : cookies) {
             if (COOKIE_REMEMBER.equals(c.getName())) {
                 c.setMaxAge(0);

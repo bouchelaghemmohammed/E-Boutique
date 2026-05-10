@@ -44,7 +44,7 @@
             <div class="stat-card animate-slide">
                 <div class="stat-card__icon">💰</div>
                 <div class="stat-card__value">
-                    <fmt:formatNumber value="${totalVentes}" type="currency" currencySymbol="$" maxFractionDigits="0"/>
+                    <fmt:formatNumber value="${totalVentes}" type="currency" currencySymbol="€" maxFractionDigits="0"/>
                 </div>
                 <div class="stat-card__label">Revenus totaux</div>
             </div>
@@ -58,7 +58,7 @@
                 <div class="stat-card__value">
                     <c:choose>
                         <c:when test="${nbCommandes > 0}">
-                            <fmt:formatNumber value="${totalVentes / nbCommandes}" type="currency" currencySymbol="$" maxFractionDigits="0"/>
+                            <fmt:formatNumber value="${totalVentes / nbCommandes}" type="currency" currencySymbol="€" maxFractionDigits="0"/>
                         </c:when>
                         <c:otherwise>—</c:otherwise>
                     </c:choose>
@@ -76,7 +76,7 @@
             <div class="stat-card animate-slide">
                 <div class="stat-card__icon">💳</div>
                 <div class="stat-card__value">
-                    <fmt:formatNumber value="${totalDepense}" type="currency" currencySymbol="$" maxFractionDigits="0"/>
+                    <fmt:formatNumber value="${totalDepense}" type="currency" currencySymbol="€" maxFractionDigits="0"/>
                 </div>
                 <div class="stat-card__label">Total dépensé</div>
             </div>
@@ -163,27 +163,33 @@
                         <tr>
                             <td><strong class="text-green">#${cmd.id}</strong></td>
                             <td><c:out value="${cmd.user.fullName}"/></td>
-                            <td>
-                                <fmt:formatDate value="${cmd.orderDate}" pattern="dd/MM/yyyy HH:mm"
-                                    type="both"/>
-                            </td>
-                            <td><fmt:formatNumber value="${cmd.total}" type="currency" currencySymbol="$"/></td>
+                            <td>${cmd.orderDateFormatted}</td>
+                            <td><fmt:formatNumber value="${cmd.total}" type="currency" currencySymbol="€"/></td>
                             <td>
                                 <c:choose>
                                     <c:when test="${cmd.status == 'PENDING'}">
-                                        <span class="badge badge-yellow">En attente</span>
+                                        <span class="badge badge-yellow">&#9203; En attente</span>
                                     </c:when>
                                     <c:when test="${cmd.status == 'CONFIRMED'}">
-                                        <span class="badge badge-green">Confirmée</span>
+                                        <span class="badge badge-green">&#9989; Confirm&#233;e</span>
+                                    </c:when>
+                                    <c:when test="${cmd.status == 'PREPARING'}">
+                                        <span class="badge badge-blue">&#128230; En pr&#233;paration</span>
                                     </c:when>
                                     <c:when test="${cmd.status == 'SHIPPED'}">
-                                        <span class="badge badge-blue">Expédiée</span>
+                                        <span class="badge badge-blue">&#128666; Exp&#233;di&#233;e</span>
                                     </c:when>
                                     <c:when test="${cmd.status == 'DELIVERED'}">
-                                        <span class="badge badge-green">Livrée</span>
+                                        <span class="badge badge-blue">&#128230; Livr&#233;e</span>
+                                    </c:when>
+                                    <c:when test="${cmd.status == 'RECEIVED'}">
+                                        <span class="badge badge-green">&#127873; R&#233;ceptionn&#233;e</span>
+                                    </c:when>
+                                    <c:when test="${cmd.status == 'CANCELLED'}">
+                                        <span class="badge badge-red">&#10060; Annul&#233;e</span>
                                     </c:when>
                                     <c:otherwise>
-                                        <span class="badge badge-red">Annulée</span>
+                                        <span class="badge"><c:out value="${cmd.status}"/></span>
                                     </c:otherwise>
                                 </c:choose>
                             </td>
@@ -209,21 +215,33 @@
                     <c:forEach var="cmd" items="${dernieres}">
                         <tr>
                             <td><strong class="text-green">#${cmd.id}</strong></td>
-                            <td>
-                                <fmt:formatDate value="${cmd.orderDate}" pattern="dd/MM/yyyy"
-                                    type="both"/>
-                            </td>
-                            <td><fmt:formatNumber value="${cmd.total}" type="currency" currencySymbol="$"/></td>
+                            <td>${cmd.orderDateFormatted}</td>
+                            <td><fmt:formatNumber value="${cmd.total}" type="currency" currencySymbol="€"/></td>
                             <td>
                                 <c:choose>
                                     <c:when test="${cmd.status == 'PENDING'}">
-                                        <span class="badge badge-yellow">En attente</span>
+                                        <span class="badge badge-yellow">⏳ En attente</span>
                                     </c:when>
                                     <c:when test="${cmd.status == 'CONFIRMED'}">
-                                        <span class="badge badge-green">Confirmée</span>
+                                        <span class="badge badge-green">&#9989; Confirm&#233;e</span>
+                                    </c:when>
+                                    <c:when test="${cmd.status == 'PREPARING'}">
+                                        <span class="badge badge-blue">&#128230; En pr&#233;paration</span>
+                                    </c:when>
+                                    <c:when test="${cmd.status == 'SHIPPED'}">
+                                        <span class="badge badge-blue">&#128666; Exp&#233;di&#233;e</span>
+                                    </c:when>
+                                    <c:when test="${cmd.status == 'DELIVERED'}">
+                                        <span class="badge badge-blue">&#128230; Livr&#233;e</span>
+                                    </c:when>
+                                    <c:when test="${cmd.status == 'RECEIVED'}">
+                                        <span class="badge badge-green">&#127873; R&#233;ceptionn&#233;e</span>
+                                    </c:when>
+                                    <c:when test="${cmd.status == 'CANCELLED'}">
+                                        <span class="badge badge-red">&#10060; Annul&#233;e</span>
                                     </c:when>
                                     <c:otherwise>
-                                        <span class="badge badge-blue">${cmd.status}</span>
+                                        <span class="badge"><c:out value="${cmd.status}"/></span>
                                     </c:otherwise>
                                 </c:choose>
                             </td>
