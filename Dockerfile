@@ -26,8 +26,9 @@ ENV WILDFLY_HOME=/opt/wildfly
 # Copier WildFly provisionné par Maven
 COPY --from=build /app/target/server ${WILDFLY_HOME}
 
-# Copier le WAR dans le dossier de déploiement WildFly
-COPY --from=build /app/target/eboutique.war ${WILDFLY_HOME}/standalone/deployments/
+# ROOT.war → WildFly déploie à la racine "/" (URL = https://xxx.up.railway.app/)
+# Au lieu de /eboutique/ (URL = https://xxx.up.railway.app/eboutique/)
+COPY --from=build /app/target/eboutique.war ${WILDFLY_HOME}/standalone/deployments/ROOT.war
 
 RUN chmod +x ${WILDFLY_HOME}/bin/standalone.sh
 
