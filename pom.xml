@@ -74,11 +74,14 @@
             <version>0.4</version>
         </dependency>
 
-        <!-- Implementation Jakarta Mail -->
+        <!-- Jakarta Mail API + implementation fournies par WildFly (scope provided) -->
+        <!-- WildFly 30 embarque deja angus-mail 2.x. Le bundler dans le WAR cree -->
+        <!-- un conflit ServiceLoader (deux classloaders voient StreamProvider). -->
         <dependency>
             <groupId>org.eclipse.angus</groupId>
             <artifactId>angus-mail</artifactId>
             <version>2.0.3</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Tests JUnit 5 -->

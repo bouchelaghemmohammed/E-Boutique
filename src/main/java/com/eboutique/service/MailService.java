@@ -26,30 +26,21 @@ public class MailService {
 
     private static final Logger LOG = Logger.getLogger(MailService.class.getName());
 
-    /** Lit une variable d'environnement, puis un systeme-propriete (-D), puis le defaut. */
+    /**
+     * Lit une variable d'environnement, puis un systeme-propriete (-D), puis le
+     * defaut.
+     */
     private static String env(String key, String def) {
         String v = System.getenv(key);
-        if (v != null && !v.isBlank()) return v.trim();
+        if (v != null && !v.isBlank())
+            return v.trim();
         v = System.getProperty(key);
-        if (v != null && !v.isBlank()) return v.trim();
+        if (v != null && !v.isBlank())
+            return v.trim();
         return def;
     }
 
     public void envoyerConfirmationCommande(Order order) throws MessagingException {
-        // Fix WildFly classloader conflict avec angus-mail :
-        // ServiceLoader.load(StreamProvider.class) cherche l'implementation via le
-        // classloader courant. Sous WildFly, ce classloader est celui du serveur
-        // (qui ne voit pas angus-mail dans WEB-INF/lib). On force le classloader du WAR.
-        ClassLoader originalCL = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-            doSend(order);
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalCL);
-        }
-    }
-
-    private void doSend(Order order) throws MessagingException {
         final String smtpHost = env("MAIL_SMTP_HOST", "");
         final String smtpPort = env("MAIL_SMTP_PORT", "2525");
         final String mailUser = env("MAIL_USERNAME", "");
@@ -66,8 +57,8 @@ public class MailService {
         if (mailPass.isBlank() || mailUser.isBlank() || smtpHost.isBlank()) {
             throw new MessagingException(
                     "SMTP non configure -- MAIL_SMTP_HOST='" + smtpHost +
-                    "' MAIL_USERNAME='" + mailUser +
-                    "' MAIL_PASSWORD blank=" + mailPass.isBlank());
+                            "' MAIL_USERNAME='" + mailUser +
+                            "' MAIL_PASSWORD blank=" + mailPass.isBlank());
         }
 
         Properties props = new Properties();
