@@ -4,16 +4,16 @@
     On exclut le module Hibernate fourni par WildFly pour utiliser
     la version embarquee dans le WAR (definie dans pom.xml).
     Cela evite les conflits de classloader entre 2 versions d'Hibernate.
+    On exclut aussi le module Jakarta Mail de WildFly pour utiliser
+    angus-mail bundle dans le WAR.
 -->
 <jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.3">
     <deployment>
         <exclusions>
             <module name="org.hibernate"/>
             <module name="org.hibernate.envers"/>
+            <!-- Forcer l'utilisation d'angus-mail bundle dans le WAR -->
+            <module name="jakarta.mail.api"/>
         </exclusions>
-        <!--
-            Pas de dependance vers com.mysql : le driver JDBC MySQL est bundle
-            dans WEB-INF/lib via la dependance Maven mysql-connector-j.
-        -->
     </deployment>
 </jboss-deployment-structure>

@@ -81,7 +81,12 @@ public class CheckoutServlet extends HttpServlet {
             try {
                 mailService.envoyerConfirmationCommande(order);
             } catch (Exception e) {
-                getServletContext().log("Echec envoi email pour commande " + order.getId(), e);
+                // Journaliser le détail complet dans les logs WildFly/Railway
+                getServletContext().log("Echec envoi email pour commande " + order.getId()
+                        + " — " + e.getClass().getSimpleName() + ": " + e.getMessage(), e);
+                // Stocker un avertissement visible dans la session (flash)
+                req.getSession().setAttribute("_flash_mail_error",
+                        e.getClass().getSimpleName() + ": " + e.getMessage());
             }
 
             panier.vider();

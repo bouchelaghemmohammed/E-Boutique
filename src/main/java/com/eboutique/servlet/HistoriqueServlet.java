@@ -66,6 +66,12 @@ public class HistoriqueServlet extends HttpServlet {
             req.setAttribute("flashInfo", flashInfo.toString());
             session.removeAttribute("_flash_historique");
         }
+        // Erreur email (diagnostic) — visible dans l'interface
+        Object flashMailError = session.getAttribute("_flash_mail_error");
+        if (flashMailError != null) {
+            req.setAttribute("flashMailError", flashMailError.toString());
+            session.removeAttribute("_flash_mail_error");
+        }
         // Compatibilité : paramètre URL
         String confirmeeId = req.getParameter("confirmee");
         if (confirmeeId != null && flash == null) {
