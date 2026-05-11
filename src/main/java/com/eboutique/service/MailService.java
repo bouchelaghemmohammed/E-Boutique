@@ -20,16 +20,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Service d'envoi d'emails via Brevo SMTP relay.
+ * Service d'envoi d'emails via Jakarta Mail (SMTP).
+ * Variables d'environnement :
+ *   MAIL_SMTP_HOST  -- serveur SMTP (ex: smtp-relay.brevo.com)
+ *   MAIL_SMTP_PORT  -- port SMTP (465 pour SSL, 587 pour STARTTLS)
+ *   MAIL_SMTP_SSL   -- "true" pour SSL/TLS direct (port 465), "false" pour STARTTLS
+ *   MAIL_USERNAME   -- identifiant SMTP
+ *   MAIL_PASSWORD   -- mot de passe / cle SMTP
+ *   MAIL_FROM       -- adresse expediteur
  */
 public class MailService {
 
     private static final Logger LOG = Logger.getLogger(MailService.class.getName());
 
-    /**
-     * Lit une variable d'environnement, puis un systeme-propriete (-D), puis le
-     * defaut.
-     */
     private static String env(String key, String def) {
         String v = System.getenv(key);
         if (v != null && !v.isBlank())
@@ -42,13 +45,14 @@ public class MailService {
 
     public void envoyerConfirmationCommande(Order order) throws MessagingException {
         final String smtpHost = env("MAIL_SMTP_HOST", "");
-        final String smtpPort = env("MAIL_SMTP_PORT", "2525");
+        final String smtpPort = env("MAIL_SMTP_PORT", "465");
+        final boolean useSsl  = !"false".equalsIgnoreCase(env("MAIL_SMTP_SSL", "true"));
         final String mailUser = env("MAIL_USERNAME", "");
         final String mailPass = env("MAIL_PASSWORD", "");
         final String mailFrom = env("MAIL_FROM", "");
 
-        LOG.info(String.format("[MailService] SMTP=%s:%s user=%s from=%s passBlank=%b",
-                smtpHost, smtpPort, mailUser, mailFrom, mailPass.isBlank()));
+        LOG.info(String.format("[MailService] SMTP=%s:%s ssl=%b user=%s from=%s passBlank=%b",
+                smtpHost, smtpPort, useSsl, mailUser, mailFrom, mailPass.isBlank()));
 
         User client = order.getUser();
         if (client == null || client.getEmail() == null) {
@@ -57,20 +61,30 @@ public class MailService {
         if (mailPass.isBlank() || mailUser.isBlank() || smtpHost.isBlank()) {
             throw new MessagingException(
                     "SMTP non configure -- MAIL_SMTP_HOST='" + smtpHost +
-                            "' MAIL_USERNAME='" + mailUser +
-                            "' MAIL_PASSWORD blank=" + mailPass.isBlank());
+                    "' MAIL_USERNAME='" + mailUser +
+                    "' MAIL_PASSWORD blank=" + mailPass.isBlank());
         }
 
         Properties props = new Properties();
         props.put("mail.smtp.host", smtpHost);
         props.put("mail.smtp.port", smtpPort);
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.ssl.trust", smtpHost);
-        props.put("mail.smtp.ssl.protocols", "TLSv1.2 TLSv1.3");
         props.put("mail.smtp.connectiontimeout", "15000");
         props.put("mail.smtp.timeout", "15000");
         props.put("mail.smtp.writetimeout", "15000");
+
+        if (useSsl) {
+            // SSL/TLS direct (port 465)
+            props.put("mail.smtp.ssl.enable", "true");
+            props.put("mail.smtp.ssl.trust", smtpHost);
+            props.put("mail.smtp.ssl.protocols", "TLSv1.2 TLSv1.3");
+        } else {
+            // STARTTLS (port 587)
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.starttls.required", "true");
+            props.put("mail.smtp.ssl.trust", smtpHost);
+            props.put("mail.smtp.ssl.protocols", "TLSv1.2 TLSv1.3");
+        }
 
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
