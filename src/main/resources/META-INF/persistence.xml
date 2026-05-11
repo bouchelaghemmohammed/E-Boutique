@@ -20,12 +20,12 @@
         <properties>
            
             <property name="jakarta.persistence.jdbc.driver"   value="com.mysql.cj.jdbc.Driver"/>
-            <!-- WildFly supporte ${prop:default} dans persistence.xml :
-                 en prod (Railway) db.url est injecte via JAVA_TOOL_OPTIONS,
-                 en local la valeur par defaut (localhost) est utilisee. -->
-            <property name="jakarta.persistence.jdbc.url"      value="${db.url:jdbc:mysql://localhost:3306/eboutique?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true}"/>
-            <property name="jakarta.persistence.jdbc.user"     value="${db.user:root}"/>
-            <property name="jakarta.persistence.jdbc.password" value="${db.password:root}"/>
+            <!-- Valeurs par defaut (localhost). JpaUtil les override au runtime
+                 en lisant db.url/db.user/db.password depuis les proprietes systeme
+                 (JAVA_TOOL_OPTIONS sur Railway) ou les variables d'environnement. -->
+            <property name="jakarta.persistence.jdbc.url"      value="jdbc:mysql://localhost:3306/eboutique?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true"/>
+            <property name="jakarta.persistence.jdbc.user"     value="root"/>
+            <property name="jakarta.persistence.jdbc.password" value="root"/>
 
             <!-- Configuration Hibernate -->
             <property name="hibernate.dialect"                  value="org.hibernate.dialect.MySQLDialect"/>

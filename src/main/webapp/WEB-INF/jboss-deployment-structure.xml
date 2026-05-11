@@ -2,6 +2,11 @@
 
 <jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.3">
     <deployment>
+        <!-- Empêche WildFly de démarrer la PU comme service au déploiement.
+             JpaUtil crée l'EMF lui-même au runtime avec les bons paramètres DB. -->
+        <exclude-subsystems>
+            <subsystem name="jpa"/>
+        </exclude-subsystems>
         <exclusions>
             <module name="org.hibernate"/>
             <module name="org.hibernate.envers"/>
