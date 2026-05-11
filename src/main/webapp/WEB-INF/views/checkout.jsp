@@ -80,7 +80,7 @@
                 <div class="checkout-tax-row checkout-tax-total" id="totalDisplay">
                     <span><strong>Total (TTC)</strong></span>
                     <span>
-                        <strong class="text-green">
+                        <strong class="text-green" id="summaryTotalAmount">
                             <fmt:formatNumber
                                 value="${not empty couponReduction ? totalAvantCoupon - couponReduction : totalAvantCoupon}"
                                 type="currency" currencySymbol="$"/>
@@ -302,6 +302,8 @@ function updateTotalDisplay(reduction) {
     var formatted = total.toLocaleString('fr-CA', {style:'currency', currency:'CAD'});
     var el = document.getElementById('confirmTotalAmount');
     if (el) el.textContent = formatted;
+    var el2 = document.getElementById('summaryTotalAmount');
+    if (el2) el2.textContent = formatted;
 }
 
 function appliquerCoupon() {
