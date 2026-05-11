@@ -1,4 +1,4 @@
-﻿package com.eboutique.service;
+package com.eboutique.service;
 
 import com.eboutique.modele.Order;
 import com.eboutique.modele.OrderItem;
