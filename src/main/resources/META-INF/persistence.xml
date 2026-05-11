@@ -18,14 +18,13 @@
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
 
         <properties>
-            <!-- Connexion MySQL — propriétés injectées via -Ddb.url / -Ddb.user / -Ddb.password -->
-            <!-- IMPORTANT : ne pas mettre de valeur par défaut contenant ':' (bug parseur WildFly) -->
-            <!-- En local : pom.xml/javaOpts les fournit automatiquement via mvn wildfly:run      -->
-            <!-- En Docker : CMD du Dockerfile les injecte via JAVA_OPTS                          -->
+           
             <property name="jakarta.persistence.jdbc.driver"   value="com.mysql.cj.jdbc.Driver"/>
-            <property name="jakarta.persistence.jdbc.url"      value="${db.url}"/>
-            <property name="jakarta.persistence.jdbc.user"     value="${db.user}"/>
-            <property name="jakarta.persistence.jdbc.password" value="${db.password}"/>
+            <!-- URL/user/password injectes dynamiquement par JpaUtil (lit db.url, db.user, db.password
+                 depuis les proprietes systeme ou variables d'environnement, avec defaut localhost). -->
+            <property name="jakarta.persistence.jdbc.url"      value="jdbc:mysql://localhost:3306/eboutique?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true"/>
+            <property name="jakarta.persistence.jdbc.user"     value="root"/>
+            <property name="jakarta.persistence.jdbc.password" value="root"/>
 
             <!-- Configuration Hibernate -->
             <property name="hibernate.dialect"                  value="org.hibernate.dialect.MySQLDialect"/>

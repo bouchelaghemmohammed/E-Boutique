@@ -101,7 +101,7 @@ public class AuthFilter implements Filter {
     }
 
     /**
-     * Essaie de reconnecter automatiquement l'utilisateur depuis le cookie
+     * essaie de reconnecter automatiquement l'utilisateur depuis le cookie
      * remember_me.
      * Crée une nouvelle session et y place l'utilisateur + restaure le panier.
      * 
