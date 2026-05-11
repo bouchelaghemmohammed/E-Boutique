@@ -137,8 +137,10 @@
         <a href="${pageContext.request.contextPath}/admin/commandes" class="action-card">
             <span class="action-card__icon">📋</span>
             <span class="action-card__label">Toutes commandes</span>
-        </a>
-    </c:if>
+        </a>        <a href="${pageContext.request.contextPath}/admin/utilisateurs" class="action-card">
+            <span class="action-card__icon">&#128101;</span>
+            <span class="action-card__label">Utilisateurs</span>
+        </a>    </c:if>
 </div>
 
 <%-- =========================================================

@@ -16,7 +16,8 @@ public class UserDao {
             em.persist(user);
             em.getTransaction().commit();
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
             throw e;
         } finally {
             em.close();
@@ -27,7 +28,7 @@ public class UserDao {
         EntityManager em = JpaUtil.getEntityManager();
         try {
             TypedQuery<User> q = em.createQuery(
-                    "SELECT u FROM User u WHERE LOWER(u.email) = LOWER(:email)", 
+                    "SELECT u FROM User u WHERE LOWER(u.email) = LOWER(:email)",
                     User.class);
             q.setParameter("email", email);
             return q.getResultStream().findFirst();
@@ -40,6 +41,26 @@ public class UserDao {
         EntityManager em = JpaUtil.getEntityManager();
         try {
             return em.createQuery("SELECT u FROM User u", User.class).getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<User> listerTousOrdreCreation() {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT u FROM User u JOIN FETCH u.role ORDER BY u.createdAt DESC",
+                    User.class).getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public Optional<User> trouverParId(Long id) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            return Optional.ofNullable(em.find(User.class, id));
         } finally {
             em.close();
         }

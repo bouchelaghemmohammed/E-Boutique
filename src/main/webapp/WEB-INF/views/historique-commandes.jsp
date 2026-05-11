@@ -119,11 +119,12 @@
                     <div class="order-reception-bar">
                         <span class="text-muted text-sm">📬 Votre colis est en route — confirmez la réception quand vous l'avez reçu.</span>
                         <form method="post" action="${pageContext.request.contextPath}/historique"
-                              onsubmit="return confirm('Confirmez-vous avoir bien reçu la commande #${commande.id} ?')">
+                              id="form-reception-${commande.id}">
                             <input type="hidden" name="action"  value="receptionner"/>
                             <input type="hidden" name="orderId" value="${commande.id}"/>
-                            <button type="submit" class="btn btn-reception">
-                                🎁 J'ai bien réceptionné ma commande
+                            <button type="button" class="btn btn-reception"
+                                    onclick="showReceptionModal(${commande.id})">
+                                &#127873; J'ai bien r&#233;ceptionn&#233; ma commande
                             </button>
                         </form>
                     </div>

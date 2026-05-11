@@ -22,6 +22,8 @@ public class UserService {
         Optional<User> optUser = userDao.trouverParEmail(email.trim());
         if (optUser.isPresent()) {
             User u = optUser.get();
+            if (!u.isEnabled())
+                return Optional.empty(); // compte désactivé
             if (PasswordHasher.verifier(motDePasseClair, u.getPasswordHash())) {
                 return Optional.of(u);
             }
@@ -80,6 +82,91 @@ public class UserService {
                 }
                 u.setPasswordHash(PasswordHasher.hacher(nouveauMdp));
             }
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // ── Opérations réservées à l'admin ───────────────────────────────────────
+
+    public void adminModifierUtilisateur(Long targetId, String prenom, String nom,
+            String email, String roleNom, boolean enabled, Long adminId) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            User u = em.find(User.class, targetId);
+            if (u == null)
+                throw new IllegalArgumentException("Utilisateur introuvable.");
+            if (prenom != null && !prenom.isBlank())
+                u.setFirstName(prenom.trim());
+            if (nom != null && !nom.isBlank())
+                u.setLastName(nom.trim());
+            if (email != null && !email.isBlank())
+                u.setEmail(email.trim().toLowerCase());
+            // L'admin ne peut pas changer son propre rôle/statut via ce panneau
+            if (!targetId.equals(adminId)) {
+                NomRole nomRole = ("ADMIN".equalsIgnoreCase(roleNom)) ? NomRole.ADMIN : NomRole.USER;
+                Role role = roleDao.trouverParNom(nomRole)
+                        .orElseThrow(() -> new IllegalStateException("Rôle non trouvé."));
+                u.setRole(role);
+                u.setEnabled(enabled);
+            }
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public void adminSupprimerUtilisateur(Long targetId) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            User u = em.find(User.class, targetId);
+            if (u != null)
+                em.remove(u);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public void adminToggleActif(Long targetId) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            User u = em.find(User.class, targetId);
+            if (u != null)
+                u.setEnabled(!u.isEnabled());
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public void adminResetPassword(Long targetId, String newPassword) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            User u = em.find(User.class, targetId);
+            if (u != null)
+                u.setPasswordHash(PasswordHasher.hacher(newPassword));
             em.getTransaction().commit();
         } catch (Exception e) {
             if (em.getTransaction().isActive())
