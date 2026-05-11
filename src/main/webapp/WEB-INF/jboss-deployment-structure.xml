@@ -1,21 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Configuration WildFly :
-    - Hibernate : exclu pour utiliser la version du WAR (evite conflits ORM)
-    - Jakarta Mail : NON exclu => WildFly fournit angus-mail via son propre
-      classloader. Bundler angus-mail dans le WAR causait une erreur
-      ServiceLoader (StreamProvider introuvable) car deux classloaders
-      voyaient la meme interface.
+    - Hibernate : exclu pour utiliser la version du WAR
+    - Jakarta Mail : PAS exclu, WildFly fournit angus-mail via la couche 'mail'
 -->
 <jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.3">
     <deployment>
         <exclusions>
             <module name="org.hibernate"/>
             <module name="org.hibernate.envers"/>
-            <!-- angus-mail est bundle dans WEB-INF/lib. Sans cette exclusion,
-                 WildFly charge StreamProvider depuis son propre classloader
-                 et ServiceLoader ne trouve pas l'implementation => ISE. -->
-            <module name="jakarta.mail.api"/>
         </exclusions>
     </deployment>
 </jboss-deployment-structure>

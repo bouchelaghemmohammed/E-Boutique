@@ -41,19 +41,6 @@ public class MailService {
     }
 
     public void envoyerConfirmationCommande(Order order) throws MessagingException {
-        // WildFly utilise le classloader serveur comme TCCL. ServiceLoader.load()
-        // cherche META-INF/services/ via le TCCL => ne trouve pas angus-mail dans
-        // WEB-INF/lib. On force le classloader du WAR le temps de l'appel.
-        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-            envoyerImpl(order);
-        } finally {
-            Thread.currentThread().setContextClassLoader(tccl);
-        }
-    }
-
-    private void envoyerImpl(Order order) throws MessagingException {
         final String smtpHost = env("MAIL_SMTP_HOST", "");
         final String smtpPort = env("MAIL_SMTP_PORT", "2525");
         final String mailUser = env("MAIL_USERNAME", "");
