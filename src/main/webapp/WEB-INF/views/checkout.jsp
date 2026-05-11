@@ -155,7 +155,7 @@
             <div class="form-group">
                 <label class="form-label" for="cardName">Nom sur la carte <span class="required">*</span></label>
                 <input type="text" id="cardName" name="cardName" class="form-control"
-                       placeholder="Jean Tremblay" autocomplete="off" form="checkoutForm" required/>
+                       placeholder="MOHAMMED BOUCHELAGHEM" autocomplete="off" form="checkoutForm" required/>
             </div>
             <div class="form-group">
                 <label class="form-label" for="cardNumber">Num&#233;ro de carte <span class="required">*</span></label>
@@ -181,7 +181,7 @@
                 </div>
             </div>
             <div class="payment-secure-note">
-                &#128274; Informations s&#233;curis&#233;es — aucun paiement r&#233;el n'est trait&#233;.
+                &#128274; Informations s&#233;curis&#233;es.
             </div>
         </div>
 

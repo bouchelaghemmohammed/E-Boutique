@@ -16,61 +16,91 @@ import jakarta.mail.internet.MimeMessage;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * Service d'envoi d'emails.
+ * Service d'envoi d'emails via Brevo SMTP relay.
  */
 public class MailService {
 
-    private static final String SMTP_HOST = env("MAIL_SMTP_HOST", "smtp.gmail.com");
-    private static final String SMTP_PORT = env("MAIL_SMTP_PORT", "587");
-    private static final String MAIL_USER = env("MAIL_USERNAME", "");
-    private static final String MAIL_PASS = env("MAIL_PASSWORD", "");
-    private static final String MAIL_FROM = env("MAIL_FROM", "");
+    private static final Logger LOG = Logger.getLogger(MailService.class.getName());
+
+    /**
+     * Lit une variable d’environnement, puis un système-propriété (-D), puis le
+     * défaut.
+     */
+    private static String env(String key, String def) {
+        String v = System.getenv(key);
+        if (v != null && !v.isBlank())
+            return v.trim();
+        v = System.getProperty(key);
+        if (v != null && !v.isBlank())
+            return v.trim();
+        return def;
+    }
 
     public void envoyerConfirmationCommande(Order order) throws MessagingException {
+        // Lire les variables à chaque appel (pas static) pour Railway
+        final String smtpHost = env("MAIL_SMTP_HOST", "");
+        final String smtpPort = env("MAIL_SMTP_PORT", "2525");
+        final String mailUser = env("MAIL_USERNAME", "");
+        final String mailPass = env("MAIL_PASSWORD", "");
+        final String mailFrom = env("MAIL_FROM", "");
+
+        LOG.info(String.format("[MailService] SMTP=%s:%s user=%s from=%s passBlank=%b",
+                smtpHost, smtpPort, mailUser, mailFrom, mailPass.isBlank()));
+
         User client = order.getUser();
         if (client == null || client.getEmail() == null) {
             throw new MessagingException("Destinataire manquant");
         }
-
-        // Si pas de mot de passe SMTP configuré, on ne tente pas la connexion
-        if (MAIL_PASS == null || MAIL_PASS.isBlank()) {
-            throw new MessagingException("SMTP non configuré (MAIL_PASSWORD manquant)");
+        if (mailPass.isBlank() || mailUser.isBlank() || smtpHost.isBlank()) {
+            throw new MessagingException(
+                    "SMTP non configuré — MAIL_SMTP_HOST='" + smtpHost +
+                            "' MAIL_USERNAME='" + mailUser +
+                            "' MAIL_PASSWORD blank=" + mailPass.isBlank());
         }
 
-        Session session = creerSession();
-        MimeMessage message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(MAIL_FROM));
-        message.setRecipients(Message.RecipientType.TO,
-                InternetAddress.parse(client.getEmail()));
-        message.setSubject("Confirmation de votre commande #" + order.getId(), "UTF-8");
-        message.setContent(construireCorps(order), "text/html; charset=UTF-8");
-
-        Transport.send(message);
-    }
-
-    private Session creerSession() {
         Properties props = new Properties();
-        props.put("mail.smtp.host", SMTP_HOST);
-        props.put("mail.smtp.port", SMTP_PORT);
+        props.put("mail.smtp.host", smtpHost);
+        props.put("mail.smtp.port", smtpPort);
         props.put("mail.smtp.auth", "true");
+        // STARTTLS (port 587 ou 2525)
         props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.starttls.required", "true");
-        // Brevo relay — accepter le certificat TLS
-        props.put("mail.smtp.ssl.trust", "smtp-relay.brevo.com");
+        // Ne PAS mettre required=true : sur port 2525 Brevo peut parfois refuser
+        props.put("mail.smtp.ssl.trust", smtpHost);
         props.put("mail.smtp.ssl.protocols", "TLSv1.2 TLSv1.3");
-        // Timeouts (10 s) — Brevo peut être lent sur Railway
-        props.put("mail.smtp.connectiontimeout", "10000");
-        props.put("mail.smtp.timeout", "10000");
-        props.put("mail.smtp.writetimeout", "10000");
+        // Timeouts généreux pour Railway (latence réseau possible)
+        props.put("mail.smtp.connectiontimeout", "15000");
+        props.put("mail.smtp.timeout", "15000");
+        props.put("mail.smtp.writetimeout", "15000");
 
-        return Session.getInstance(props, new Authenticator() {
+        final String finalUser = mailUser;
+        final String finalPass = mailPass;
+
+        Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(MAIL_USER, MAIL_PASS);
+                return new PasswordAuthentication(finalUser, finalPass);
             }
         });
+
+        try {
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(mailFrom));
+            message.setRecipients(Message.RecipientType.TO,
+                    InternetAddress.parse(client.getEmail()));
+            message.setSubject("Confirmation de votre commande #" + order.getId(), "UTF-8");
+            message.setContent(construireCorps(order), "text/html; charset=UTF-8");
+
+            Transport.send(message);
+            LOG.info("[MailService] Email envoyé avec succès à " + client.getEmail());
+
+        } catch (MessagingException ex) {
+            LOG.log(Level.SEVERE, "[MailService] Échec envoi email : " + ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     private String construireCorps(Order o) {
@@ -96,10 +126,5 @@ public class MailService {
         html.append("<p>Cordialement,<br>L'équipe E-Boutique</p>");
         html.append("</body></html>");
         return html.toString();
-    }
-
-    private static String env(String cle, String defaut) {
-        String v = System.getenv(cle);
-        return (v == null || v.isBlank()) ? defaut : v;
     }
 }

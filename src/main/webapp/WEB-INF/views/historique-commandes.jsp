@@ -28,6 +28,14 @@
     </div>
 </c:if>
 
+<%-- ── Erreur email (diagnostic) — affiché seulement si email n'a pas pu être envoyé ── --%>
+<c:if test="${not empty flashMailError}">
+    <div class="alert" style="background:#fff3cd;border:1px solid #ffc107;color:#856404;padding:1rem;border-radius:8px;margin-bottom:1rem;">
+        ⚠️ L'email de confirmation n'a pas pu être envoyé.<br>
+        <small><code><c:out value="${flashMailError}"/></code></small>
+    </div>
+</c:if>
+
 <c:choose>
     <c:when test="${empty commandes}">
         <div class="cart-empty animate-fade">
