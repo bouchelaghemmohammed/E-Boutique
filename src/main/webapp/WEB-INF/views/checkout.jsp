@@ -72,6 +72,11 @@
                         <span>&#8722; <fmt:formatNumber value="${couponReduction}" type="currency" currencySymbol="$"/></span>
                     </div>
                 </c:if>
+                <%-- Ligne coupon ajoutée dynamiquement par JS si session vide --%>
+                <div id="coupon-tax-row" class="checkout-tax-row" style="color:var(--green-400);display:none;">
+                    <span>&#127881; Coupon <strong id="coupon-tax-code"></strong></span>
+                    <span>&#8722;&nbsp;<span id="coupon-tax-amount"></span></span>
+                </div>
                 <div class="checkout-tax-row checkout-tax-total" id="totalDisplay">
                     <span><strong>Total (TTC)</strong></span>
                     <span>
@@ -88,6 +93,7 @@
         <%-- 2. Coupon de r&#233;duction --%>
         <div class="card animate-slide mb-2">
             <h2 class="checkout-section-title">&#127881; Coupon de r&#233;duction</h2>
+            <div id="coupon-body">
             <c:choose>
                 <c:when test="${not empty couponCode}">
                     <div class="coupon-applied">
@@ -111,6 +117,7 @@
                     <div id="couponMsg" style="margin-top:0.5rem; font-size:0.85rem;"></div>
                 </c:otherwise>
             </c:choose>
+            </div><%-- /coupon-body --%>
         </div>
 
         <%-- 3. Adresse de livraison --%>
@@ -300,9 +307,7 @@ function updateTotalDisplay(reduction) {
 function appliquerCoupon() {
     var code = document.getElementById('couponInput').value.trim().toUpperCase();
     if (!code) { showCouponMsg('Veuillez entrer un code.', 'red'); return; }
-    var msg = document.getElementById('couponMsg');
-    msg.textContent = 'V\u00e9rification...';
-    msg.style.color = 'var(--text-muted)';
+    showCouponMsg('V\u00e9rification...', 'muted');
 
     var params = new URLSearchParams();
     params.append('code', code);
@@ -310,7 +315,26 @@ function appliquerCoupon() {
         .then(r => r.json())
         .then(data => {
             if (data.ok) {
-                showCouponMsg('\u2713 Coupon appliqu\u00e9 : -' + data.reduction.toFixed(2) + ' $ (' + data.libelle + ')', 'green');
+                // 1. Remplacer la zone coupon par la banni\u00e8re \u00ab appliqu\u00e9 \u00bb
+                var body = document.getElementById('coupon-body');
+                if (body) {
+                    body.innerHTML = '<div class="coupon-applied">' +
+                        '<span>&#10003; Coupon <strong>' + code + '</strong> appliqu\u00e9\u00a0!' +
+                        ' (\u2212\u00a0' + data.reduction.toLocaleString('fr-CA', {minimumFractionDigits:2, maximumFractionDigits:2}) + '\u00a0$' +
+                        (data.libelle ? ' \u2014 ' + data.libelle : '') + ')' +
+                        '</span>' +
+                        '<button type="button" class="btn btn-sm btn-outline" onclick="retirerCoupon()">Retirer</button>' +
+                        '</div>';
+                }
+                // 2. Afficher la ligne coupon dans le r\u00e9capitulatif des taxes
+                var taxRow = document.getElementById('coupon-tax-row');
+                if (taxRow) {
+                    taxRow.style.display = 'flex';
+                    document.getElementById('coupon-tax-code').textContent = code;
+                    document.getElementById('coupon-tax-amount').textContent =
+                        data.reduction.toLocaleString('fr-CA', {minimumFractionDigits:2, maximumFractionDigits:2}) + '\u00a0$';
+                }
+                // 3. Mettre \u00e0 jour le total
                 updateTotalDisplay(data.reduction);
                 couponReduction = data.reduction;
             } else {
@@ -322,7 +346,11 @@ function appliquerCoupon() {
 
 function showCouponMsg(text, color) {
     var el = document.getElementById('couponMsg');
-    if (el) { el.textContent = text; el.style.color = color === 'green' ? 'var(--green-400)' : 'var(--red-400, #f87171)'; }
+    if (!el) return;
+    el.textContent = text;
+    el.style.color = color === 'green' ? 'var(--green-400)'
+        : color === 'muted' ? 'var(--text-muted)'
+        : 'var(--red-400, #f87171)';
 }
 
 function retirerCoupon() {

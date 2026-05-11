@@ -28,6 +28,7 @@ CREATE TABLE users (
     last_name VARCHAR(80) NOT NULL,
     role_id BIGINT NOT NULL,
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    adresse_livraison VARCHAR(500),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_user_role FOREIGN KEY (role_id) REFERENCES roles (id)
 ) ENGINE = InnoDB;

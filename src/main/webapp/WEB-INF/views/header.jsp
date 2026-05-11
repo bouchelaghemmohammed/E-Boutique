@@ -58,6 +58,9 @@
                         <a href="${pageContext.request.contextPath}/admin/coupons">
                             &#127915; Coupons
                         </a>
+                        <a href="${pageContext.request.contextPath}/admin/utilisateurs">
+                            &#128101; Utilisateurs
+                        </a>
                     </div>
                 </div>
             </c:if>
