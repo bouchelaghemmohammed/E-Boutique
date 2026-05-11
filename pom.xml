@@ -74,13 +74,14 @@
             <version>0.4</version>
         </dependency>
 
-        <!-- angus-mail bundle dans le WAR (scope compile).
-             WildFly mail module exclu dans jboss-deployment-structure.xml
-             pour eviter le conflit ServiceLoader StreamProvider. -->
+        <!-- angus-mail fourni par WildFly via la couche Galleon 'mail'.
+             scope=provided : ne pas bundler dans le WAR pour eviter le conflit
+             ServiceLoader (Cannot load StreamProvider). -->
         <dependency>
             <groupId>org.eclipse.angus</groupId>
             <artifactId>angus-mail</artifactId>
             <version>2.0.3</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Tests JUnit 5 -->
@@ -123,6 +124,12 @@
                             <location>org.wildfly:wildfly-galleon-pack:30.0.1.Final</location>
                         </feature-pack>
                     </feature-packs>
+                    <layers>
+                        <!-- Couche mail : inclut le subsystem mail WildFly (angus-mail)
+                             Necesssaire pour que jakarta.mail.util.StreamProvider
+                             soit resolvable via ServiceLoader dans le classloader serveur. -->
+                        <layer>mail</layer>
+                    </layers>
                     <provisioning-dir>${project.build.directory}/server</provisioning-dir>
                     <!--
                         javaOpts override : retire -Djava.security.manager=allow par defaut
