@@ -499,6 +499,68 @@ function closeReceptionModal() {
 document.getElementById('receptionModalConfirm').addEventListener('click', function(){
     if (_pendingReceptionId) document.getElementById('form-reception-' + _pendingReceptionId).submit();
 });
+
+/* ══ Polling temps réel — vérifie les statuts toutes les 12 secondes ══ */
+<c:if test="${not empty commandes}">
+var _statuts = {};
+<c:forEach var="c" items="${commandes}">
+_statuts[${c.id}] = '${c.status}';
+</c:forEach>
+
+var _pollingUrl = '${pageContext.request.contextPath}/historique?format=json';
+var _pollingTimer = null;
+
+function demarrerPolling() {
+    _pollingTimer = setInterval(function () {
+        fetch(_pollingUrl, { credentials: 'same-origin' })
+            .then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(function(data) {
+                var changed = false;
+                data.forEach(function(o) {
+                    if (_statuts[o.id] !== undefined && _statuts[o.id] !== o.status) {
+                        changed = true;
+                    }
+                });
+                if (changed) {
+                    afficherNotifMaj();
+                    setTimeout(function() { location.reload(); }, 1800);
+                }
+            })
+            .catch(function() { /* silencieux */ });
+    }, 12000);
+}
+
+function afficherNotifMaj() {
+    clearInterval(_pollingTimer); // arrêter le polling pendant le rechargement
+    var div = document.createElement('div');
+    div.style.cssText = [
+        'position:fixed', 'top:72px', 'right:1.2rem',
+        'z-index:10000', 'max-width:320px',
+        'background:var(--green-600)', 'color:#fff',
+        'border-radius:var(--radius)', 'padding:0.75rem 1.2rem',
+        'box-shadow:0 4px 20px rgba(0,0,0,.3)',
+        'font-weight:600', 'font-size:0.9rem',
+        'animation:pulse-dot 1.8s infinite'
+    ].join(';');
+    div.textContent = '\uD83D\uDD04 Mise à jour des commandes\u2026';
+    document.body.appendChild(div);
+}
+
+// Démarrer le polling si la page est visible
+if (typeof document.hidden !== 'undefined') {
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            clearInterval(_pollingTimer);
+        } else {
+            demarrerPolling();
+        }
+    });
+}
+demarrerPolling();
+</c:if>
 </script>
 
 <jsp:include page="footer.jsp"/>

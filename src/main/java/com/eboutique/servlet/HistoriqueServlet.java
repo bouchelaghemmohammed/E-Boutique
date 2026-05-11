@@ -30,6 +30,29 @@ public class HistoriqueServlet extends HttpServlet {
         User connecte = (User) session.getAttribute("utilisateurConnecte");
 
         List<Order> orders = orderDao.listerParUtilisateur(connecte.getId());
+
+        // ── Endpoint JSON pour le polling temps réel ──
+        if ("json".equals(req.getParameter("format"))) {
+            resp.setContentType("application/json;charset=UTF-8");
+            resp.setHeader("Cache-Control", "no-store");
+            StringBuilder json = new StringBuilder("[");
+            boolean first = true;
+            for (Order o : orders) {
+                if (!first)
+                    json.append(",");
+                json.append("{\"id\":").append(o.getId())
+                        .append(",\"status\":\"")
+                        .append(o.getStatus()).append("\"");
+                // Indique si le bouton réception doit apparaître
+                boolean canReceive = "SHIPPED".equals(o.getStatus()) || "DELIVERED".equals(o.getStatus());
+                json.append(",\"canReceive\":").append(canReceive).append("}");
+                first = false;
+            }
+            json.append("]");
+            resp.getWriter().write(json.toString());
+            return;
+        }
+
         req.setAttribute("commandes", orders);
 
         // Flash message
