@@ -56,10 +56,14 @@ public class MailService {
         props.put("mail.smtp.port", SMTP_PORT);
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
-        // Timeout de connexion : 5 secondes max pour ne pas bloquer la requête
-        props.put("mail.smtp.connectiontimeout", "5000");
-        props.put("mail.smtp.timeout", "5000");
-        props.put("mail.smtp.writetimeout", "5000");
+        props.put("mail.smtp.starttls.required", "true");
+        // Brevo relay — accepter le certificat TLS
+        props.put("mail.smtp.ssl.trust", "smtp-relay.brevo.com");
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2 TLSv1.3");
+        // Timeouts (10 s) — Brevo peut être lent sur Railway
+        props.put("mail.smtp.connectiontimeout", "10000");
+        props.put("mail.smtp.timeout", "10000");
+        props.put("mail.smtp.writetimeout", "10000");
 
         return Session.getInstance(props, new Authenticator() {
             @Override
