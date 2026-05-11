@@ -183,7 +183,12 @@ public class PanierServlet extends HttpServlet {
             return null;
         for (Cookie c : cookies) {
             if (COOKIE_PANIER.equals(c.getName()) && !c.getValue().isEmpty()) {
-                return c.getValue();
+                
+                String val = c.getValue();
+                if (val.startsWith("\"") && val.endsWith("\"") && val.length() >= 2) {
+                    val = val.substring(1, val.length() - 1);
+                }
+                return val.isEmpty() ? null : val;
             }
         }
         return null;

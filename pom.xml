@@ -74,14 +74,11 @@
             <version>0.4</version>
         </dependency>
 
-        <!-- angus-mail fourni par WildFly via la couche Galleon 'mail'.
-             scope=provided : ne pas bundler dans le WAR pour eviter le conflit
-             ServiceLoader (Cannot load StreamProvider). -->
+        <!-- Jakarta Mail via angus-mail  -->
         <dependency>
             <groupId>org.eclipse.angus</groupId>
             <artifactId>angus-mail</artifactId>
             <version>2.0.3</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Tests JUnit 5 -->
@@ -107,13 +104,7 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.4.0</version>
             </plugin>
-            <!--
-                WildFly Maven Plugin :
-                - mvn wildfly:dev    : telecharge WildFly, deploie le WAR, demarre en mode dev
-                - mvn wildfly:run    : deploie + demarre (sans hot reload)
-                - mvn wildfly:start  : demarre seulement
-                - mvn wildfly:shutdown : arrete le serveur
-            -->
+           
             <plugin>
                 <groupId>org.wildfly.plugins</groupId>
                 <artifactId>wildfly-maven-plugin</artifactId>
@@ -125,20 +116,16 @@
                         </feature-pack>
                     </feature-packs>
                     <layers>
-                        <!-- Couches de base pour une app Jakarta EE web + JPA + mail -->
+                        <!-- Couches de base pour une app Jakarta EE web + JPA -->
                         <layer>web-server</layer>
                         <layer>jpa</layer>
-                        <layer>mail</layer>
                         <layer>ejb-lite</layer>
                         <layer>cdi</layer>
                         <layer>bean-validation</layer>
                         <layer>jsf</layer>
                     </layers>
                     <provisioning-dir>${project.build.directory}/server</provisioning-dir>
-                    <!--
-                        javaOpts override : retire -Djava.security.manager=allow par defaut
-                        car le SecurityManager est supprime sur Java 24+ (Emile est sur Java 25).
-                    -->
+                   
                     <javaOpts>
                         <javaOpt>-Xms64m</javaOpt>
                         <javaOpt>-Xmx512m</javaOpt>

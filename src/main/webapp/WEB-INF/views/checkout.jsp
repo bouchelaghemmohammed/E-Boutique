@@ -29,7 +29,7 @@
 
 <div class="checkout-page-grid">
 
-    <%-- ══════════ COLONNE GAUCHE ══════════ --%>
+
     <div class="checkout-left">
 
         <%-- 1. R&#233;capitulatif panier --%>
@@ -90,7 +90,7 @@
             </div>
         </div>
 
-        <%-- 2. Coupon de r&#233;duction --%>
+
         <div class="card animate-slide mb-2">
             <h2 class="checkout-section-title">&#127881; Coupon de r&#233;duction</h2>
             <div id="coupon-body">
@@ -117,10 +117,10 @@
                     <div id="couponMsg" style="margin-top:0.5rem; font-size:0.85rem;"></div>
                 </c:otherwise>
             </c:choose>
-            </div><%-- /coupon-body --%>
+            </div><%-- coupon --%>
         </div>
 
-        <%-- 3. Adresse de livraison --%>
+        <%-- Adresse de livraison --%>
         <div class="card animate-slide mb-2">
             <h2 class="checkout-section-title">&#128230; Adresse de livraison</h2>
             <form id="checkoutForm" method="post" action="${pageContext.request.contextPath}/checkout"
@@ -140,10 +140,10 @@
         </div>
     </div>
 
-    <%-- ══════════ COLONNE DROITE ══════════ --%>
+
     <div class="checkout-right">
 
-        <%-- 4. Informations carte de cr&#233;dit --%>
+
         <div class="card animate-slide mb-2">
             <h2 class="checkout-section-title">&#128179; Paiement par carte</h2>
             <div style="display:flex; gap:0.4rem; margin-bottom:1rem;">

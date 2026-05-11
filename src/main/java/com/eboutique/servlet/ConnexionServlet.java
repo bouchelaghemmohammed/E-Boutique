@@ -17,6 +17,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 /**
  * Servlet de connexion (GET + POST /connexion).
@@ -24,6 +25,7 @@ import java.util.Optional;
 @WebServlet(name = "ConnexionServlet", urlPatterns = { "/connexion" })
 public class ConnexionServlet extends HttpServlet {
 
+    private static final Logger LOG = Logger.getLogger(ConnexionServlet.class.getName());
     private static final String COOKIE_REMEMBER = "remember_me";
     private static final int COOKIE_MAX_AGE = 30 * 24 * 3600; // 30 jours
 
@@ -78,26 +80,41 @@ public class ConnexionServlet extends HttpServlet {
 
         User user = optUser.get();
 
-        // Lire les données panier depuis sessionStorage (envoyées via champ caché du
-        // formulaire)
-        String cookieVal = req.getParameter("sessionPanier");
-
-        // Invalider l'ancienne session et en créer une nouvelle (protection session
-        // fixation)
+        // 1) Récupérer le panier depuis la session courante (PanierFilter a pu le
+        // restaurer)
         HttpSession oldSession = req.getSession(false);
+        Panier panierAvantConnexion = null;
         if (oldSession != null) {
+            panierAvantConnexion = (Panier) oldSession.getAttribute("panier");
+            LOG.warning("[PANIER-DEBUG] oldSession existe, panier en session = " + panierAvantConnexion);
             oldSession.invalidate();
+        } else {
+            LOG.warning("[PANIER-DEBUG] oldSession est NULL");
         }
+
+        // 2) Fallback direct depuis le cookie (si la session n'avait pas de panier)
+        if (panierAvantConnexion == null || panierAvantConnexion.estVide()) {
+            String cookieVal = PanierServlet.lireCookiePanier(req);
+            LOG.warning("[PANIER-DEBUG] cookieVal = '" + cookieVal + "'");
+            if (cookieVal != null && !cookieVal.isBlank()) {
+                try {
+                    panierAvantConnexion = PanierServlet.restaurerDepuisCookie(cookieVal);
+                    LOG.warning("[PANIER-DEBUG] panier restaure depuis cookie, vide=" + panierAvantConnexion.estVide()
+                            + " lignes=" + panierAvantConnexion.getNombreArticles());
+                } catch (Exception e) {
+                    LOG.warning("[PANIER-DEBUG] EXCEPTION restauration cookie : " + e);
+                }
+            }
+        }
+
+        // Nouvelle session (protection contre la fixation de session)
         HttpSession session = req.getSession(true);
         session.setAttribute("utilisateurConnecte", user);
         session.setMaxInactiveInterval(30 * 60);
 
-        // Toujours restaurer le panier depuis le cookie (la nouvelle session est vide)
-        if (cookieVal != null && !cookieVal.isBlank()) {
-            Panier panier = PanierServlet.restaurerDepuisCookie(cookieVal);
-            if (!panier.estVide()) {
-                session.setAttribute("panier", panier);
-            }
+        // Transférer le panier vers la nouvelle session
+        if (panierAvantConnexion != null && !panierAvantConnexion.estVide()) {
+            session.setAttribute("panier", panierAvantConnexion);
         }
 
         if ("on".equals(rememberMe) || "true".equals(rememberMe)) {
