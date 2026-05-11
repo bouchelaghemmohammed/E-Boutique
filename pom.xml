@@ -125,10 +125,14 @@
                         </feature-pack>
                     </feature-packs>
                     <layers>
-                        <!-- Couche mail : inclut le subsystem mail WildFly (angus-mail)
-                             Necesssaire pour que jakarta.mail.util.StreamProvider
-                             soit resolvable via ServiceLoader dans le classloader serveur. -->
+                        <!-- Couches de base pour une app Jakarta EE web + JPA + mail -->
+                        <layer>web-server</layer>
+                        <layer>jpa</layer>
                         <layer>mail</layer>
+                        <layer>ejb-lite</layer>
+                        <layer>cdi</layer>
+                        <layer>bean-validation</layer>
+                        <layer>jsf</layer>
                     </layers>
                     <provisioning-dir>${project.build.directory}/server</provisioning-dir>
                     <!--
