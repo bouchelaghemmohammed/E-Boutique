@@ -44,14 +44,14 @@
 <div class="catalogue-results-info text-muted text-sm mb-2">
     <c:choose>
         <c:when test="${not empty q && not empty produits}">
-            <strong>${produits.size()}</strong> résultat(s) pour "<c:out value='${q}'/>"
+            <strong>${totalProduits}</strong> résultat(s) pour "<c:out value='${q}'/>"
         </c:when>
         <c:when test="${not empty q && empty produits}">
             Aucun résultat pour "<c:out value='${q}'/>" —
             <a href="${pageContext.request.contextPath}/catalogue">voir tout le catalogue</a>
         </c:when>
         <c:when test="${not empty categorieId && not empty produits}">
-            <strong>${produits.size()}</strong> produit(s) dans cette catégorie
+            <strong>${totalProduits}</strong> produit(s) dans cette catégorie
         </c:when>
     </c:choose>
 </div>
@@ -139,6 +139,62 @@
         </div>
     </c:otherwise>
 </c:choose>
+
+<%-- ── Pagination ── --%>
+<c:if test="${totalPages > 1}">
+<div class="pagination animate-fade">
+    <%-- Précédent --%>
+    <c:choose>
+        <c:when test="${page > 1}">
+            <a class="page-btn"
+               href="${pageContext.request.contextPath}/catalogue?page=${page-1}<c:if test='${not empty q}'>&amp;q=<c:out value='${q}'/></c:if><c:if test='${not empty categorieId}'>&amp;categorieId=${categorieId}</c:if>">
+                &laquo;
+            </a>
+        </c:when>
+        <c:otherwise><span class="page-btn disabled">&laquo;</span></c:otherwise>
+    </c:choose>
+
+    <%-- Numéros de pages --%>
+    <c:forEach var="i" begin="1" end="${totalPages}">
+        <c:choose>
+            <c:when test="${i == page}">
+                <span class="page-btn active">${i}</span>
+            </c:when>
+            <c:otherwise>
+                <a class="page-btn"
+                   href="${pageContext.request.contextPath}/catalogue?page=${i}<c:if test='${not empty q}'>&amp;q=<c:out value='${q}'/></c:if><c:if test='${not empty categorieId}'>&amp;categorieId=${categorieId}</c:if>">
+                    ${i}
+                </a>
+            </c:otherwise>
+        </c:choose>
+    </c:forEach>
+
+    <%-- Suivant --%>
+    <c:choose>
+        <c:when test="${page < totalPages}">
+            <a class="page-btn"
+               href="${pageContext.request.contextPath}/catalogue?page=${page+1}<c:if test='${not empty q}'>&amp;q=<c:out value='${q}'/></c:if><c:if test='${not empty categorieId}'>&amp;categorieId=${categorieId}</c:if>">
+                &raquo;
+            </a>
+        </c:when>
+        <c:otherwise><span class="page-btn disabled">&raquo;</span></c:otherwise>
+    </c:choose>
+</div>
+</c:if>
+
+<style>
+.pagination { display:flex; justify-content:center; gap:0.4rem; margin:2rem 0; flex-wrap:wrap; }
+.page-btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:2.2rem; height:2.2rem; padding:0 0.6rem;
+    border:1px solid var(--border); border-radius:6px;
+    font-size:0.9rem; text-decoration:none; color:var(--text);
+    background:var(--surface); transition:background 0.15s;
+}
+.page-btn:hover:not(.disabled):not(.active) { background:var(--border); }
+.page-btn.active { background:var(--green-400); color:#0a0a0a; border-color:var(--green-400); font-weight:700; }
+.page-btn.disabled { opacity:0.35; cursor:default; }
+</style>
 
 <jsp:include page="footer.jsp"/>
 

@@ -33,8 +33,9 @@
             <property name="hibernate.show_sql"                 value="true"/>
             <property name="hibernate.format_sql"               value="true"/>
 
-            <!-- Empêcher WildFly de basculer sur la base H2 par défaut -->
-            <property name="wildfly.jpa.twophase" value="false" />
+            <!-- Dire a WildFly de NE PAS gerer cette PU comme service container.
+                 JpaUtil cree l'EMF lui-meme via Persistence.createEntityManagerFactory(). -->
+            <property name="jboss.as.jpa.managed" value="false"/>
         </properties>
     </persistence-unit>
 
