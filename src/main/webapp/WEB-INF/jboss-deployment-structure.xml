@@ -12,6 +12,10 @@
         <exclusions>
             <module name="org.hibernate"/>
             <module name="org.hibernate.envers"/>
+            <!-- angus-mail est bundle dans WEB-INF/lib. Sans cette exclusion,
+                 WildFly charge StreamProvider depuis son propre classloader
+                 et ServiceLoader ne trouve pas l'implementation => ISE. -->
+            <module name="jakarta.mail.api"/>
         </exclusions>
     </deployment>
 </jboss-deployment-structure>
